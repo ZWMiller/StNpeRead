@@ -157,7 +157,7 @@ void StNpeRead::bookObjects()
       mh2InvMassPtE[trg]       = new TH2F(Form("mh2InvMassPtE_%i",trg),"",1000,0,10,1000,0,10);
       mh2InvMassPtLS[trg]      = new TH2F(Form("mh2InvMassPtLS_%i",trg),"",1000,0,10,1000,0,10);
       mh2InvMassPtUS[trg]      = new TH2F(Form("mh2InvMassPtUS_%i",trg),"",1000,0,10,1000,0,10);
-            
+         
       mh2DelPhiIncl[trg]       = new TH2F(Form("mh2DelPhiIncl_%i",trg),"",400,-10,10,400,0,20);
       mh2DelPhiPhotLS[trg]     = new TH2F(Form("mh2DelPhiPhotLS_%i",trg),"",400,-10,10,400,0,20);
       mh2DelPhiPhotUS[trg]     = new TH2F(Form("mh2DelPhiPhotUS_%i",trg),"",400,-10,10,400,0,20);
@@ -1024,7 +1024,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	{
 	  // if(!(trk->trgTowDsmAdc() < 0.1*trk->adc0())) // This matches the data analysis with embedding, according to Xiaozhi who did the embedding
 	  //  continue;
-	  cout << "!!There is NPE!!" << endl;
+	  // DEBUG cout << "!!There is NPE!!" << endl;
 	  // Get values for primary track (electron track)
 	  Float_t ePhi = Phi;
 	  Float_t poe  = trk->gMom().mag()/trk->e0();
@@ -1046,12 +1046,12 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  mh2InvMassPtE[trg]-> Fill(m_m,pT);
 
 	  Int_t printCheck = 0;
-	  for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) // Want to loop over all tracks looking for hads. Not going to double count, since there's only 1 NPE-e/evt on average
+	  for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) // Want to loop over all tracks looking for hads. Not going to double count, since there's only 1 NPE-e/evt on average (in events with NPE, which are rare)
 	    {
 	      StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 	      Float_t hpT   = htrk->pMom().perp();
 	      
-	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track a hadron and not the same track or e-?
+	      if(trk != htrk && pass_cut_hTrack(htrk) && !pass_cut_nsigmaE(htrk)) // Is this track a hadron and not the same track or e-?
 		{
 		  Float_t hp    = htrk->pMom().mag();
 		  Float_t hbeta = htrk->btofBeta();
@@ -1061,10 +1061,11 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  Float_t hq    = htrk->charge();
 		  Float_t dPhi  = ePhi-hPhi;
 		  Float_t hEta  = htrk->gMom().pseudoRapidity();
-		  Float_t wt = getHadronWt(hpT,hEta);
-		  if(printCheck < 20){
+		  Float_t wt    = getHadronWt(hpT,hEta);
+		  /* DEBUG if(printCheck < 20){
 		    cout << "WEIGHT: " << wt << endl;
-		    printCheck++;}
+		    printCheck++;}*/
+				   
 		  if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		  if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
 		  mh2PhiQPt[trg]     -> Fill(hPhi,hq*hpT);
@@ -1072,6 +1073,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
 		  mh2DelPhiInclWt[trg] -> Fill(dPhi,epT,wt);
 		  mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt);
+		  
 		}		  
 	    }
 	
@@ -1086,7 +1088,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 		  Float_t hpT   = htrk->pMom().perp();
 		  
-		  if(trk != htrk && pass_cut_hTrack(htrk) && hpT > hpTCut)
+		  if(trk != htrk && pass_cut_hTrack(htrk) && hpT > hpTCut && !pass_cut_nsigmaE(htrk))
 		    {
 		      pileupCounter++;
 		    }
@@ -1155,7 +1157,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 		    {
 		      StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 		      Float_t hpT = htrk->pMom().perp();
-		      if(etrk != htrk && pass_cut_hTrack(htrk)) // Is this track a hadron and not the same track or e-?
+		      if(etrk != htrk && pass_cut_hTrack(htrk) && !pass_cut_nsigmaE(htrk)) // Is this track a hadron and not the same track or e-?
 			{
 			  Float_t hPhi = htrk->pMom().phi();
 			  Float_t dPhi  = ePhi-hPhi;
