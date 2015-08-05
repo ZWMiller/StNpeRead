@@ -1134,51 +1134,48 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 	      Float_t eq = etrk->charge();
 	      Float_t epT = etrk->gMom().perp();
 	      
-	      if(1)//pass_cut_GoodTrack(ptrk) && pass_cut_nsigmaE(ptrk)) // Partner Conditions (just make sure it's an e- and good track)
-		{
-		  Float_t pp = ptrk -> gMom().mag();
-		  Float_t pbeta = ptrk -> btofBeta();
-		  Float_t pm_m = pp*pp*(1/(pbeta*pbeta)-1);
-		  Float_t pPhi = ptrk -> gMom().phi();
-		  Float_t ppoe = ptrk -> gMom().mag()/ptrk->e0();
-		  Float_t pq = ptrk -> charge();
-		  
-		  /// For Pair information sorting w/o Hadrons
-		  if(eq == pq)
-		    {
-		      mh2InvMassPtLS[bTrg]  -> Fill(pair->m(),epT);
-		    }
-		  if(eq != pq)
-		    {
-		      mh2InvMassPtUS[bTrg]  -> Fill(pair->m(),epT);
-		    }
+	      Float_t pp = ptrk -> gMom().mag();
+	      Float_t pbeta = ptrk -> btofBeta();
+	      Float_t pm_m = pp*pp*(1/(pbeta*pbeta)-1);
+	      Float_t pPhi = ptrk -> gMom().phi();
+	      Float_t ppoe = ptrk -> gMom().mag()/ptrk->e0();
+	      Float_t pq = ptrk -> charge();
 	      
-		  for(Int_t ih = ip; ih < mNpeEvent->nTracks(); ih++) // loop over all tracks in the event
+	      /// For Pair information sorting w/o Hadrons
+	      if(eq == pq)
+		{
+		  mh2InvMassPtLS[bTrg]  -> Fill(pair->m(),epT);
+		}
+	      if(eq != pq)
+		{
+		  mh2InvMassPtUS[bTrg]  -> Fill(pair->m(),epT);
+		}
+	      
+	      for(Int_t ih = ip; ih < mNpeEvent->nTracks(); ih++) // loop over all tracks in the event
+		{
+		  StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
+		  Float_t hpT = htrk->pMom().perp();
+		  if(etrk != htrk && ptrk != htrk && pass_cut_hTrack(htrk) && !pass_cut_nsigmaE(htrk)) // Is this track a hadron and not the same track or e-?
 		    {
-		      StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
-		      Float_t hpT = htrk->pMom().perp();
-		      if(etrk != htrk && pass_cut_hTrack(htrk) && !pass_cut_nsigmaE(htrk)) // Is this track a hadron and not the same track or e-?
+		      Float_t hPhi = htrk->pMom().phi();
+		      Float_t dPhi  = ePhi-hPhi;
+		      Float_t hEta  = htrk->gMom().pseudoRapidity();
+		      Float_t wt = getHadronWt(hpT,hEta);
+		      if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+		      if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
+		      if(eq == pq)
 			{
-			  Float_t hPhi = htrk->pMom().phi();
-			  Float_t dPhi  = ePhi-hPhi;
-			  Float_t hEta  = htrk->gMom().pseudoRapidity();
-			  Float_t wt = getHadronWt(hpT,hEta);
-			  if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-			  if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
-			  if(eq == pq)
-			    {
-			      mh2DelPhiPhotLS[bTrg] -> Fill(dPhi,epT);
-			      mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT);
-			      mh2DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,wt);
-			      mh3DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
-			    }
-			  if(eq != pq)
-			    {
-			      mh2DelPhiPhotUS[bTrg] -> Fill(dPhi,epT);
-			      mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT);
-			      mh2DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,wt);
-			      mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
-			    }
+			  mh2DelPhiPhotLS[bTrg] -> Fill(dPhi,epT);
+			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT);
+			  mh2DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,wt);
+			  mh3DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
+			}
+		      if(eq != pq)
+			{
+			  mh2DelPhiPhotUS[bTrg] -> Fill(dPhi,epT);
+			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT);
+			  mh2DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,wt);
+			  mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			}
 		    }
 		}
@@ -1186,6 +1183,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 	}
     }
 }
+
 
 // Fill Pileup Checking histos
 void StNpeRead::zFill_Pileup (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t ps ) // Fill histograms for events that are non-paired electrons
@@ -1980,15 +1978,17 @@ if(htTrg==2 && trk->trgTowDsmAdc()>18) return kTRUE;
  mh2Vxy[bTrg]->Fill(Vx,Vy);
     }
 }*/
+
+
 //eID cuts
 Bool_t StNpeRead::pass_cut_nsigmaE(StDmesonTrack* trk)
-{ if(!trk) return kFALSE;
+{ 
+  if(!trk) return kFALSE;
   Float_t nSigmaE=trk->nSigmaElectron();
   
       if(nSigmaE>cuts::nsigmae_low && nSigmaE<cuts::nsigmae_high)  
 	return kTRUE;
   else return kFALSE;
-      
 }
   
 Bool_t StNpeRead::pass_cut_ADC(Int_t trg, StDmesonTrack* trk)
@@ -2067,9 +2067,8 @@ Bool_t StNpeRead::pass_cut_GoodTrack(StDmesonTrack * trk)
     
     return kTRUE;
   else return kFALSE;
-  
-  
 }
+
 Bool_t StNpeRead::pass_cut_Pt_Eta(StDmesonTrack *trk)
 {
   Float_t Pt=trk->gMom().perp();
