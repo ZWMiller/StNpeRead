@@ -408,6 +408,7 @@ class StNpeRead
 	TH3F *  mh3DelPhiIncl[4];
 	TH3F *  mh3DelPhiPhotLS[4];
 	TH3F *  mh3DelPhiPhotUS[4];
+	TH3F *  mh3DelPhiPhotUSNP[4];
 	TH3F *  mh3DelPhiInclWt[4];
 	TH3F *  mh3DelPhiPhotLSWt[4];
 	TH3F *  mh3DelPhiPhotUSWt[4];

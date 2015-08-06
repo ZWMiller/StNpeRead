@@ -158,17 +158,18 @@ void StNpeRead::bookObjects()
       mh2InvMassPtLS[trg]      = new TH2F(Form("mh2InvMassPtLS_%i",trg),"",1000,0,10,1000,0,10);
       mh2InvMassPtUS[trg]      = new TH2F(Form("mh2InvMassPtUS_%i",trg),"",1000,0,10,1000,0,10);
          
-      mh2DelPhiIncl[trg]       = new TH2F(Form("mh2DelPhiIncl_%i",trg),"",400,-10,10,400,0,20);
-      mh2DelPhiPhotLS[trg]     = new TH2F(Form("mh2DelPhiPhotLS_%i",trg),"",400,-10,10,400,0,20);
-      mh2DelPhiPhotUS[trg]     = new TH2F(Form("mh2DelPhiPhotUS_%i",trg),"",400,-10,10,400,0,20);
+      mh2DelPhiIncl[trg]       = new TH2F(Form("mh2DelPhiIncl_%i",trg),"",1,-10,10,1,0,20);
+      mh2DelPhiPhotLS[trg]     = new TH2F(Form("mh2DelPhiPhotLS_%i",trg),"",1,-10,10,1,0,20);
+      mh2DelPhiPhotUS[trg]     = new TH2F(Form("mh2DelPhiPhotUS_%i",trg),"",1,-10,10,1,0,20);
 
       mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",400,-10,10,400,0,20,40,0,20);
       mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",400,-10,10,400,0,20,40,0,20);
       mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",400,-10,10,400,0,20,40,0,20);
+      mh3DelPhiPhotUSNP[trg]     = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",400,-10,10,400,0,20,40,0,20);
 
-      mh2DelPhiInclWt[trg]       = new TH2F(Form("mh2DelPhiInclWt_%i",trg),"",400,-10,10,400,0,20);
-      mh2DelPhiPhotLSWt[trg]     = new TH2F(Form("mh2DelPhiPhotLSWt_%i",trg),"",400,-10,10,400,0,20);
-      mh2DelPhiPhotUSWt[trg]     = new TH2F(Form("mh2DelPhiPhotUSWt_%i",trg),"",400,-10,10,400,0,20);
+      mh2DelPhiInclWt[trg]       = new TH2F(Form("mh2DelPhiInclWt_%i",trg),"",1,-10,10,1,0,20);
+      mh2DelPhiPhotLSWt[trg]     = new TH2F(Form("mh2DelPhiPhotLSWt_%i",trg),"",1,-10,10,1,0,20);
+      mh2DelPhiPhotUSWt[trg]     = new TH2F(Form("mh2DelPhiPhotUSWt_%i",trg),"",1,-10,10,1,0,20);
       mh2DelPhiInclWt[trg]->Sumw2();
       mh2DelPhiPhotLSWt[trg]->Sumw2();
       mh2DelPhiPhotUSWt[trg]->Sumw2();
@@ -556,6 +557,7 @@ void StNpeRead::writeObjects()
        mh3DelPhiIncl[trg]      -> Write();
        mh3DelPhiPhotLS[trg]    -> Write();
        mh3DelPhiPhotUS[trg]    -> Write();
+       mh3DelPhiPhotUSNP[trg]    -> Write();
        mh2DelPhiInclWt[trg]    -> Write();
        mh2DelPhiPhotLSWt[trg]  -> Write();
        mh2DelPhiPhotUSWt[trg]  -> Write();
@@ -996,6 +998,8 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
   
   TClonesArray* aTracks = 0;
   aTracks=mNpeEvent->tracks();
+  TClonesArray* aPairs = 0;
+  aPairs=mNpeEvent->electronPair();
   for(Int_t it=0;it<mNpeEvent->nTracks();it++)
     {
       pileupCounter = 0; // Clear for each event
@@ -1026,6 +1030,19 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  //  continue;
 	  // DEBUG cout << "!!There is NPE!!" << endl;
 	  // Get values for primary track (electron track)
+
+	  /*  for(Int_t ip=0;ip<mNpeEvent->nElectronPair();ip++)
+	    {
+	      StElectronPair* pair = (StElectronPair*)aPairs->At(ip);
+	      StDmesonTrack*  etrk = (StDmesonTrack*)aTracks->At(pair->electronId());
+	      StDmesonTrack*  ptrk = (StDmesonTrack*)aTracks->At(pair->partnerId());
+	      
+	      if(trk == etrk && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA)
+		{
+		  // DEBUG cout << "Tracks are linked." << endl;
+		}
+		}*/
+	  
 	  Float_t ePhi = Phi;
 	  Float_t poe  = trk->gMom().mag()/trk->e0();
 	  Float_t nPhi = trk->nPhi();
@@ -1120,7 +1137,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 	  // {
 	  if(isHotTower(etrk,bTrg)) // If in a hot tower, don't do any other checks, skip track
 	    continue;
-	  if(pass_cut_GoodTrack(etrk) && pass_cut_nsigmaE(etrk) && pass_cut_Pt_Eta(etrk) && pass_cut_ADC(bTrg,etrk) &&
+	  if(pass_cut_GoodTrack(etrk) && pass_cut_Pt_Eta(etrk) && pass_cut_ADC(bTrg,etrk) &&
 	     pass_cut_Match_EMC_Dz(etrk) && pass_cut_Match_EMC_Dphi(etrk) && pass_cut_poe(etrk) && pass_cut_EMC(etrk)) // Is track an electron and the ADC0 big enough to be the trigger?
 	    {
 	      // if(!(etrk->trgTowDsmAdc() < 0.1*etrk->adc0())) // This matches the data analysis with embedding, according to Xiaozhi who did the embedding
@@ -1155,7 +1172,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 		{
 		  StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 		  Float_t hpT = htrk->pMom().perp();
-		  if(etrk != htrk && ptrk != htrk && pass_cut_hTrack(htrk) && !pass_cut_nsigmaE(htrk)) // Is this track a hadron and not the same track or e-?
+		  if(etrk != htrk && pass_cut_hTrack(htrk)) // Is this track a hadron and not the same track or e-?
 		    {
 		      Float_t hPhi = htrk->pMom().phi();
 		      Float_t dPhi  = ePhi-hPhi;
@@ -1176,6 +1193,8 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT);
 			  mh2DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,wt);
 			  mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
+			  if(ptrk != htrk)
+			     mh3DelPhiPhotUSNP[bTrg] -> Fill(dPhi,epT,hpT);
 			}
 		    }
 		}
