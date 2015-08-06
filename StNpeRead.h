@@ -397,9 +397,6 @@ class StNpeRead
 	TH2F *  mh2InvMassPtE[4];
 	TH2F *  mh2InvMassPtUS[4];
 	TH2F *  mh2InvMassPtLS[4];
-	TH2F *  mh2DelPhiIncl[4];
-	TH2F *  mh2DelPhiPhotLS[4];
-	TH2F *  mh2DelPhiPhotUS[4];
 	TH2F *  mh2nTracksZdcx[4];
 	TH2F *  mh2nTracksBbcx[4];
 	TH2F *  mh2nETracksZdcx[4];
@@ -409,12 +406,12 @@ class StNpeRead
 	TH3F *  mh3DelPhiPhotLS[4];
 	TH3F *  mh3DelPhiPhotUS[4];
 	TH3F *  mh3DelPhiPhotUSNP[4];
+	TH3F *  mh3DelPhiPhotLSNP[4];
+	TH3F *  mh3DelPhiPhotInclNP[4];
 	TH3F *  mh3DelPhiInclWt[4];
 	TH3F *  mh3DelPhiPhotLSWt[4];
 	TH3F *  mh3DelPhiPhotUSWt[4];
-	TH2F *  mh2DelPhiInclWt[4];
-	TH2F *  mh2DelPhiPhotLSWt[4];
-	TH2F *  mh2DelPhiPhotUSWt[4];
+
 
 	//Projections[ptbin][trig]
 	/*TH1D *  projHPhi[14][4];
