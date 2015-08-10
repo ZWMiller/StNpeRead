@@ -1008,15 +1008,14 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  // if(!(trk->trgTowDsmAdc() < 0.1*trk->adc0())) // This matches the data analysis with embedding, according to Xiaozhi who did the embedding
 	  //  continue;
 	  // DEBUG cout << "!!There is NPE!!" << endl;
-	  // Get values for primary track (electron track)
-
-	  for(Int_t ip=0;ip<mNpeEvent->nElectronPair();ip++)
+       
+	  for(Int_t ip=0;ip<mNpeEvent->nElectronPair();ip++) // loop over pair branch to check if singleTrack also in Pair 
 	    {
 	      StElectronPair* pair = (StElectronPair*)aPairs->At(ip);
 	      StDmesonTrack*  etrk = (StDmesonTrack*)aTracks->At(pair->electronId());
 	      StDmesonTrack*  ptrk = (StDmesonTrack*)aTracks->At(pair->partnerId());
 	      
-	      if((trk == etrk || trk == ptrk) && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA)
+	      if((trk == etrk || trk == ptrk) && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA) // pair cuts + check for track id match
 		{
 		  // DEBUG cout << "Tracks are linked." << endl;
 		  isInPair = kTRUE;
@@ -1048,7 +1047,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	      StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 	      Float_t hpT   = htrk->pMom().perp();
 	      
-	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track a hadron and not the same track or e-?
+	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track pass as hadron track quality AND not the same track
 		{
 		  Float_t hp    = htrk->pMom().mag();
 		  Float_t hbeta = htrk->btofBeta();

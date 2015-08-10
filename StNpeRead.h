@@ -397,10 +397,6 @@ class StNpeRead
 	TH2F *  mh2InvMassPtE[4];
 	TH2F *  mh2InvMassPtUS[4];
 	TH2F *  mh2InvMassPtLS[4];
-	TH2F *  mh2nTracksZdcx[4];
-	TH2F *  mh2nTracksBbcx[4];
-	TH2F *  mh2nETracksZdcx[4];
-	TH2F *  mh2nETracksBbcx[4];
 	TH3F *  mh3nTracksZdcx[4];
 	TH3F *  mh3DelPhiIncl[4];
 	TH3F *  mh3DelPhiPhotLS[4];
