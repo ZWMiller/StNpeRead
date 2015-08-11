@@ -31,6 +31,8 @@
 #include "TCanvas.h"
 #include "TDirectory.h"
 #include "TClonesArray.h"
+#include "TRandom.h"
+#include "TRandom3.h"
 
 //Float_t KAONMASS2 = 0.49367 * 0.49367;
 //Float_t PHIMASS = 1.01945; // GeV/c/c
@@ -41,7 +43,7 @@ ClassImp(StNpeRead)
 //-----------------------------------------------------------------------------
 StNpeRead::StNpeRead(const char* outName)
 {
-  numPtBins = 14;
+  numPtBins = 14; maxBufferSize = 10;
   writeXiaozhiHists = kFALSE; writeDataQA = kFALSE; writeRunQA = kFALSE; // Set flags for QA writing (to minimize file size when QA unnecessary)
   pi = 3.1415826;
   // Initialize the hadron weighting function (if can't find, exit)
@@ -158,20 +160,27 @@ void StNpeRead::bookObjects()
       mh2InvMassPtLS[trg]      = new TH2F(Form("mh2InvMassPtLS_%i",trg),"",1000,0,10,1000,0,10);
       mh2InvMassPtUS[trg]      = new TH2F(Form("mh2InvMassPtUS_%i",trg),"",1000,0,10,1000,0,10);
 
-      mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotUSNP[trg]     = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotLSNP[trg]     = new TH3F(Form("mh3DelPhiPhotLSNP_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotInclNP[trg]     = new TH3F(Form("mh3DelPhiPhotInclNP_%i",trg),"",400,-10,10,400,0,20,40,0,20);
+      mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotUSNP[trg]     = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotLSNP[trg]     = new TH3F(Form("mh3DelPhiPhotLSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotInclNP[trg]     = new TH3F(Form("mh3DelPhiPhotInclNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
 
-      mh3DelPhiInclWt[trg]       = new TH3F(Form("mh3DelPhiInclWt_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotLSWt[trg]     = new TH3F(Form("mh3DelPhiPhotLSWt_%i",trg),"",400,-10,10,400,0,20,40,0,20);
-      mh3DelPhiPhotUSWt[trg]     = new TH3F(Form("mh3DelPhiPhotUSWt_%i",trg),"",400,-10,10,400,0,20,40,0,20);
+      mh3DelPhiInclWt[trg]       = new TH3F(Form("mh3DelPhiInclWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotLSWt[trg]     = new TH3F(Form("mh3DelPhiPhotLSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotUSWt[trg]     = new TH3F(Form("mh3DelPhiPhotUSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh3DelPhiInclWt[trg]->Sumw2();mh3DelPhiPhotLSWt[trg]->Sumw2();mh3DelPhiPhotUSWt[trg]->Sumw2();
 
       mh3nTracksZdcx[trg]     = new TH3F(Form("mh3nTracksZdcx_%i",trg),"",200,0,20000,30,0,30,10,0,2);
+
     }
+
+  /// Mixed Events
+  mh3MixedDelPhi          = new TH3F("mh3MixedDelPhi","",400,-10,10,200,0,20,40,0,20);
+  mh3MixedDelEta          = new TH3F("mh3MixedDelEta","",400,-10,10,200,0,20,40,0,20);
+  
+
   /*
   Int_t bin1D[5]={1400,1400,1400,1400,1400}; Double_t xMin1D[5]={-7,-7,-7,-7,-7};  Double_t xMax1D[5]={7,7,7,7,7};
   Int_t binx2D[5]={700,1400,1400,1400,1400}; Double_t xMin2D[5]={-40,-7,-7,-7,-7}; Double_t xMax2D[5]={40,7,7,7,7};
@@ -547,9 +556,12 @@ void StNpeRead::writeObjects()
        mh3DelPhiPhotLSWt[trg]  -> Write();
        mh3DelPhiPhotUSWt[trg]  -> Write();
  
- 
        // Pileup Histos
        mh3nTracksZdcx[trg]     -> Write();
+       
+       // Mixed Events
+       mh3MixedDelPhi          -> Write();
+       mh3MixedDelEta          -> Write();
      }
    
    /* for(Int_t ii=0; ii<5; ii++)
@@ -1008,21 +1020,20 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  // if(!(trk->trgTowDsmAdc() < 0.1*trk->adc0())) // This matches the data analysis with embedding, according to Xiaozhi who did the embedding
 	  //  continue;
 	  // DEBUG cout << "!!There is NPE!!" << endl;
-	  // Get values for primary track (electron track)
-
-	  for(Int_t ip=0;ip<mNpeEvent->nElectronPair();ip++)
+       
+	  for(Int_t ip=0;ip<mNpeEvent->nElectronPair();ip++) // loop over pair branch to check if singleTrack also in Pair 
 	    {
 	      StElectronPair* pair = (StElectronPair*)aPairs->At(ip);
 	      StDmesonTrack*  etrk = (StDmesonTrack*)aTracks->At(pair->electronId());
 	      StDmesonTrack*  ptrk = (StDmesonTrack*)aTracks->At(pair->partnerId());
 	      
-	      if((trk == etrk || trk == ptrk) && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA)
+	      if((trk == etrk || trk == ptrk) && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA) // pair cuts + check for track id match
 		{
 		  // DEBUG cout << "Tracks are linked." << endl;
 		  isInPair = kTRUE;
 		}
 	    }
-	  
+	  computeMixedEvents(trk);
 	  Float_t ePhi = Phi;
 	  Float_t poe  = trk->gMom().mag()/trk->e0();
 	  Float_t nPhi = trk->nPhi();
@@ -1048,8 +1059,10 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	      StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 	      Float_t hpT   = htrk->pMom().perp();
 	      
-	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track a hadron and not the same track or e-?
+	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track pass as hadron track quality AND not the same track
 		{
+		  addToHadBuffer(htrk);
+
 		  Float_t hp    = htrk->pMom().mag();
 		  Float_t hbeta = htrk->btofBeta();
 		  Float_t hm_m  = p*p*(1/(beta*beta)-1);
@@ -2267,4 +2280,40 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    inf.close();
    fEff = new TF1("fEff","[0]*exp(-pow([1]/x,[2]))",0.2,15);
    return 1;
+ }
+
+ void StNpeRead::addToHadBuffer(StDmesonTrack* trk)
+ {
+   if(hadVec.size() < maxBufferSize)
+     hadVec.push_back(trk);
+   else
+     {
+       TRandom3* gRand = new TRandom3();
+       Int_t eventPoint = (int) gRand->Uniform(0,maxBufferSize-1e-6);
+       hadVec[eventPoint] = trk;
+     }
+
+   cout << hadVec.size();
+ }
+
+ void StNpeRead::computeMixedEvents(StDmesonTrack* trk)
+ {
+   Float_t Phi = trk->gMom().phi();
+   Float_t pT  = trk->gMom().perp();
+   Float_t Eta = trk->gMom().pseudoRapidity();
+   
+   for(Int_t it=0; it < hadVec.size(); it++)
+     {
+       StDmesonTrack* htrk = hadVec[it];
+       Float_t hPhi = htrk->pMom().phi();
+       Float_t hpT  = htrk->pMom().perp();
+       Float_t hEta = htrk->pMom().pseudoRapidity();
+
+       Float_t dPhi = Phi-hPhi;
+       if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+       if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
+       Float_t dEta = Eta - hEta;
+       mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
+       mh3MixedDelEta -> Fill(dEta, pT, hpT);
+     }
  }

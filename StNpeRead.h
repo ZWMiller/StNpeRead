@@ -11,6 +11,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <vector>
 #include "TProfile.h"
 
 class TString;
@@ -84,6 +85,8 @@ class StNpeRead
     Bool_t pass_cut_hTrack(StDmesonTrack *); // check for hadrons tracks
     Double_t getHadronWt(Double_t, Double_t);
     Int_t readEff(); // Read in Efficiencies from exterior files
+    void addToHadBuffer(StDmesonTrack *); // Create a buffer for hadrons
+    void computeMixedEvents(StDmesonTrack *);
     //// end Add
 
   private:
@@ -408,6 +411,9 @@ class StNpeRead
 	TH3F *  mh3DelPhiPhotLSWt[4];
 	TH3F *  mh3DelPhiPhotUSWt[4];
 
+	TH3F *  mh3MixedDelPhi;
+	TH3F *  mh3MixedDelEta;
+
 
 	//Projections[ptbin][trig]
 	/*TH1D *  projHPhi[14][4];
@@ -429,6 +435,8 @@ class StNpeRead
 
 	Float_t pi; // just to make it a single definition
 	Int_t numPtBins;
+	Int_t maxBufferSize;
+	std::vector<StDmesonTrack*> hadVec;
 	ClassDef(StNpeRead, 1)
 	  };
 
