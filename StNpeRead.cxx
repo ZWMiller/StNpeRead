@@ -179,6 +179,7 @@ void StNpeRead::bookObjects()
   /// Mixed Events
   mh3MixedDelPhi          = new TH3F("mh3MixedDelPhi","",400,-10,10,200,0,20,40,0,20);
   mh3MixedDelEta          = new TH3F("mh3MixedDelEta","",400,-10,10,200,0,20,40,0,20);
+  mh3MixedEtaPhi          = new TH3F("mh3MixedEtaPhi","",400,-10,10,200,-5,5,40,0,20);
   
 
   /*
@@ -562,6 +563,7 @@ void StNpeRead::writeObjects()
        // Mixed Events
        mh3MixedDelPhi          -> Write();
        mh3MixedDelEta          -> Write();
+       mh3MixedEtaPhi          -> Write();
      }
    
    /* for(Int_t ii=0; ii<5; ii++)
@@ -1027,7 +1029,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	      StDmesonTrack*  etrk = (StDmesonTrack*)aTracks->At(pair->electronId());
 	      StDmesonTrack*  ptrk = (StDmesonTrack*)aTracks->At(pair->partnerId());
 	      
-	      if((trk == etrk || trk == ptrk) && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA) // pair cuts + check for track id match
+	      if((trk == etrk || trk == ptrk) && pair->pairDca() < cuts::pairDCA && pair->m() < cuts::massDCA && etrk->charge()!=ptrk->charge()) // pair cuts + check for track id match
 		{
 		  // DEBUG cout << "Tracks are linked." << endl;
 		  isInPair = kTRUE;
@@ -2293,7 +2295,7 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
        hadVec[eventPoint] = trk;
      }
 
-   cout << hadVec.size();
+   // DEBUG cout << hadVec.size();
  }
 
  void StNpeRead::computeMixedEvents(StDmesonTrack* trk)
@@ -2315,5 +2317,6 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
        Float_t dEta = Eta - hEta;
        mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
        mh3MixedDelEta -> Fill(dEta, pT, hpT);
+       mh3MixedEtaPhi -> Fill(dPhi, dEta, pT);
      }
  }

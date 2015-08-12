@@ -156,7 +156,7 @@ namespace cuts
 
 	const Float_t eta = 1.0;
 	const Float_t eta_low =0.7;
-	const Float_t gDca = 1;
+	const Float_t gDca = 1.5;
         const Float_t pt=0.2;
 	const Float_t Pt_cut=2.0;
 
@@ -179,7 +179,7 @@ namespace cuts
 	const Float_t tof_Ylocal=1.8;
 	//for Pair;
 
-	const Float_t massDCA=0.3;
+	const Float_t massDCA=0.24;
 	const Float_t pairDCA=1.0;
 
 	// For Had ID (Bingchu cuts)

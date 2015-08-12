@@ -413,6 +413,7 @@ class StNpeRead
 
 	TH3F *  mh3MixedDelPhi;
 	TH3F *  mh3MixedDelEta;
+	TH3F *  mh3MixedEtaPhi;
 
 
 	//Projections[ptbin][trig]
