@@ -86,7 +86,7 @@ class StNpeRead
     Double_t getHadronWt(Double_t, Double_t);
     Int_t readEff(); // Read in Efficiencies from exterior files
     void addToHadBuffer(StDmesonEvent *); // Create a buffer for hadrons
-    void computeMixedEvents(StDmesonTrack *, Double_t);
+    void computeMixedEvents(StDmesonEvent*,StDmesonTrack *, Double_t);
     //// end Add
 
   private:

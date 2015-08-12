@@ -1038,7 +1038,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		}
 	    }
 	  // Mixed Event
-	  computeMixedEvents(trk,vz);
+	  computeMixedEvents(mNpeEvent,trk,vz);
 	  if(!isAddedToBuffer)
 	    {
 	      addToHadBuffer(mNpeEvent);
@@ -2312,7 +2312,7 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    // DEBUG cout << hadVec.size();
  }
 
-void StNpeRead::computeMixedEvents(StDmesonTrack* trk, Double_t vz)
+ void StNpeRead::computeMixedEvents(StDmesonEvent* eEvt, StDmesonTrack* trk, Double_t vz)
  {
    
    Float_t Phi = trk->gMom().phi();
@@ -2327,6 +2327,8 @@ void StNpeRead::computeMixedEvents(StDmesonTrack* trk, Double_t vz)
    for(Int_t it=0; it < hadVec[vzbin].size(); it++)
      {
        StDmesonEvent* evt = hadVec[vzbin][it];
+       if(eEvt == evt)
+	 continue;
        TClonesArray* aTracks = 0;
        aTracks=evt->tracks();
        for(Int_t ih = 0; ih < evt->nTracks(); ih++) // Want to loop over all tracks looking for hads. 
