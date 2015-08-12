@@ -992,6 +992,8 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
   aTracks=mNpeEvent->tracks();
   TClonesArray* aPairs = 0;
   aPairs=mNpeEvent->electronPair();
+  isAddedToBuffer = kFALSE;
+  Double_t vz = mNpeEvent->primaryVertex().z();
   for(Int_t it=0;it<mNpeEvent->nTracks();it++)
     {
       Bool_t isInPair = kFALSE;
@@ -1035,7 +1037,13 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  isInPair = kTRUE;
 		}
 	    }
-	  computeMixedEvents(trk);
+	  // Mixed Event
+	  computeMixedEvents(trk,vz);
+	  if(!isAddedToBuffer)
+	    {
+	      addToHadBuffer(mNpeEvent);
+	      isAddedToBuffer = kTRUE;
+	    }
 	  Float_t ePhi = Phi;
 	  Float_t poe  = trk->gMom().mag()/trk->e0();
 	  Float_t nPhi = trk->nPhi();
@@ -1063,7 +1071,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	      
 	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track pass as hadron track quality AND not the same track
 		{
-		  addToHadBuffer(htrk);
+		 
 
 		  Float_t hp    = htrk->pMom().mag();
 		  Float_t hbeta = htrk->btofBeta();
@@ -2284,39 +2292,62 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    return 1;
  }
 
- void StNpeRead::addToHadBuffer(StDmesonTrack* trk)
+ void StNpeRead::addToHadBuffer(StDmesonEvent * evt)
  {
-   if(hadVec.size() < maxBufferSize)
-     hadVec.push_back(trk);
+   Int_t vzbin = (Int_t)evt->primaryVertex().z()+35; // add 35 since there are 70 bins for -35,35. makes -35 = 0. 
+   if(vzbin<0 || vzbin >70){
+     cout << "VZ OUT OF RANGE" << endl;
+     return;
+   }
+   cout << "Vz: " << vzbin << " size: " << hadVec[vzbin].size() << endl;
+   if(hadVec[vzbin].size() < maxBufferSize)
+     hadVec[vzbin].push_back(evt);
    else
      {
        TRandom3* gRand = new TRandom3();
        Int_t eventPoint = (int) gRand->Uniform(0,maxBufferSize-1e-6);
-       hadVec[eventPoint] = trk;
+       hadVec[vzbin][eventPoint] = evt;
      }
-
+     cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
    // DEBUG cout << hadVec.size();
  }
 
- void StNpeRead::computeMixedEvents(StDmesonTrack* trk)
+void StNpeRead::computeMixedEvents(StDmesonTrack* trk, Double_t vz)
  {
+   
    Float_t Phi = trk->gMom().phi();
    Float_t pT  = trk->gMom().perp();
    Float_t Eta = trk->gMom().pseudoRapidity();
+   Int_t vzbin = (Int_t)vz+35;
+   if(vzbin<0 || vzbin>70)
+     return;
    
-   for(Int_t it=0; it < hadVec.size(); it++)
+   if(hadVec[vzbin].size()<=0)
+     return;
+   for(Int_t it=0; it < hadVec[vzbin].size(); it++)
      {
-       StDmesonTrack* htrk = hadVec[it];
-       Float_t hPhi = htrk->pMom().phi();
-       Float_t hpT  = htrk->pMom().perp();
-       Float_t hEta = htrk->pMom().pseudoRapidity();
-
-       Float_t dPhi = Phi-hPhi;
-       if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-       if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
-       Float_t dEta = Eta - hEta;
-       mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
-       mh3MixedDelEta -> Fill(dEta, pT, hpT);
-       mh3MixedEtaPhi -> Fill(dPhi, dEta, pT);
+       StDmesonEvent* evt = hadVec[vzbin][it];
+       TClonesArray* aTracks = 0;
+       aTracks=evt->tracks();
+       for(Int_t ih = 0; ih < evt->nTracks(); ih++) // Want to loop over all tracks looking for hads. 
+	 {
+	   StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
+	   Float_t hpT   = htrk->pMom().perp();
+	   
+	   if(trk != htrk && pass_cut_hTrack(htrk))
+	     {
+	       Float_t hPhi = htrk->pMom().phi();
+	       Float_t hpT  = htrk->pMom().perp();
+	       Float_t hEta = htrk->pMom().pseudoRapidity();
+	       
+	       Float_t dPhi = Phi-hPhi;
+	       if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+	       if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
+	       Float_t dEta = Eta - hEta;
+	       mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
+	       mh3MixedDelEta -> Fill(dEta, pT, hpT);
+	       mh3MixedEtaPhi -> Fill(dPhi, dEta, pT);
+	     }
+	 }
      }
  }

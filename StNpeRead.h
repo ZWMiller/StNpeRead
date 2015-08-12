@@ -85,8 +85,8 @@ class StNpeRead
     Bool_t pass_cut_hTrack(StDmesonTrack *); // check for hadrons tracks
     Double_t getHadronWt(Double_t, Double_t);
     Int_t readEff(); // Read in Efficiencies from exterior files
-    void addToHadBuffer(StDmesonTrack *); // Create a buffer for hadrons
-    void computeMixedEvents(StDmesonTrack *);
+    void addToHadBuffer(StDmesonEvent *); // Create a buffer for hadrons
+    void computeMixedEvents(StDmesonTrack *, Double_t);
     //// end Add
 
   private:
@@ -437,7 +437,8 @@ class StNpeRead
 	Float_t pi; // just to make it a single definition
 	Int_t numPtBins;
 	Int_t maxBufferSize;
-	std::vector<StDmesonTrack*> hadVec;
+	Bool_t isAddedToBuffer;
+	std::vector<StDmesonEvent*> hadVec[70];
 	ClassDef(StNpeRead, 1)
 	  };
 
