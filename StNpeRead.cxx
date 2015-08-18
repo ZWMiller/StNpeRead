@@ -2309,12 +2309,12 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
        hadVec[vzbin][eventPoint] = evt;
      }
      cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
-   // DEBUG cout << hadVec.size();
+   //DEBUG cout << hadVec.size();
  }
 
  void StNpeRead::computeMixedEvents(StDmesonEvent* eEvt, StDmesonTrack* trk, Double_t vz)
  {
-   
+   cout << "in compute" << endl;
    Float_t Phi = trk->gMom().phi();
    Float_t pT  = trk->gMom().perp();
    Float_t Eta = trk->gMom().pseudoRapidity();
@@ -2324,11 +2324,14 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    
    if(hadVec[vzbin].size()<=0)
      return;
+   
    for(Int_t it=0; it < hadVec[vzbin].size(); it++)
      {
        StDmesonEvent* evt = hadVec[vzbin][it];
-       if(eEvt == evt)
-	 continue;
+       cout << "in mixed event loop" <<endl;
+       //       if(eEvt == evt)
+       //	 continue;
+       
        TClonesArray* aTracks = 0;
        aTracks=evt->tracks();
        for(Int_t ih = 0; ih < evt->nTracks(); ih++) // Want to loop over all tracks looking for hads. 
@@ -2338,6 +2341,7 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
 	   
 	   if(trk != htrk && pass_cut_hTrack(htrk))
 	     {
+	       cout << "actually have mixed had track" << endl;
 	       Float_t hPhi = htrk->pMom().phi();
 	       Float_t hpT  = htrk->pMom().perp();
 	       Float_t hEta = htrk->pMom().pseudoRapidity();
