@@ -163,16 +163,19 @@ void StNpeRead::bookObjects()
       mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotUSNP[trg]     = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotLSNP[trg]     = new TH3F(Form("mh3DelPhiPhotLSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotInclNP[trg]     = new TH3F(Form("mh3DelPhiPhotInclNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotUSNP[trg]   = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotLSNP[trg]   = new TH3F(Form("mh3DelPhiPhotLSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotInclNP[trg] = new TH3F(Form("mh3DelPhiPhotInclNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
 
-      mh3DelPhiInclWt[trg]       = new TH3F(Form("mh3DelPhiInclWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotLSWt[trg]     = new TH3F(Form("mh3DelPhiPhotLSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotUSWt[trg]     = new TH3F(Form("mh3DelPhiPhotUSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiInclWt[trg]     = new TH3F(Form("mh3DelPhiInclWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotLSWt[trg]   = new TH3F(Form("mh3DelPhiPhotLSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiPhotUSWt[trg]   = new TH3F(Form("mh3DelPhiPhotUSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh3DelPhiInclWt[trg]->Sumw2();mh3DelPhiPhotLSWt[trg]->Sumw2();mh3DelPhiPhotUSWt[trg]->Sumw2();
 
-      mh3nTracksZdcx[trg]     = new TH3F(Form("mh3nTracksZdcx_%i",trg),"",200,0,20000,30,0,30,10,0,2);
+      mh3DelPhiHadHad[trg]     = new TH3F(Form("mh3DelPhiHadHad_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh1PtHadTracks[trg]      = new TH1F(Form("mh1PtHadTracks_%i",trg),"",400,0,20);
+
+      mh3nTracksZdcx[trg]      = new TH3F(Form("mh3nTracksZdcx_%i",trg),"",200,0,20000,30,0,30,10,0,2);
 
     }
 
@@ -556,7 +559,9 @@ void StNpeRead::writeObjects()
        mh3DelPhiInclWt[trg]    -> Write();
        mh3DelPhiPhotLSWt[trg]  -> Write();
        mh3DelPhiPhotUSWt[trg]  -> Write();
- 
+       mh3DelPhiHadHad[trg]    -> Write();
+       mh1PtHadTracks[trg]     -> Write();
+
        // Pileup Histos
        mh3nTracksZdcx[trg]     -> Write();
        
@@ -1044,6 +1049,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	      addToHadBuffer(mNpeEvent);
 	      isAddedToBuffer = kTRUE;
 	    }
+
 	  Float_t ePhi = Phi;
 	  Float_t poe  = trk->gMom().mag()/trk->e0();
 	  Float_t nPhi = trk->nPhi();
@@ -1115,6 +1121,37 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		}
 	      mh3nTracksZdcx[trg]->Fill(mNpeEvent->ZDCx(),pileupCounter,hpTCut); // Fill on a per event basis
 	    }
+	}
+      
+      if(pass_cut_GoodTrack(trk) && pass_cut_nsigmaPi(trk) && pass_cut_Pt_Eta(trk)) // Is this track part of pure pion sample
+        {
+	  
+	  Float_t phi = trk->pMom().phi();
+	  Float_t pT  = trk->gMom().perp();
+          mh1PtHadTracks[trg] -> Fill(pT);
+
+	  for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) // Want to loop over all tracks looking for hads. Not going to double count, since there's only 1 NPE-e/evt on average \
+	    (in events with NPE, which are rare)                                                                                                                                                 
+	      {
+		StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
+		Float_t hpT   = htrk->pMom().perp();
+
+		if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track pass as hadron track quality AND not the same track              
+		  {
+		    Float_t hp    = htrk->pMom().mag();
+		    Float_t hPhi  = htrk->pMom().phi();
+		    Float_t dPhi  = phi-hPhi;
+		    Float_t hEta  = htrk->gMom().pseudoRapidity();
+		    Float_t wt    = getHadronWt(hpT,hEta);
+		    /* DEBUG if(printCheck < 20){                                                                                                                                      
+		       cout << "WEIGHT: " << wt << endl;                                                                                                                                
+		       printCheck++;}*/
+
+		    if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+		    if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
+		    mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT);
+		  }
+	      }
 	}
     }
 }
@@ -2005,6 +2042,17 @@ Bool_t StNpeRead::pass_cut_nsigmaE(StDmesonTrack* trk)
 	return kTRUE;
   else return kFALSE;
 }
+
+//Select pure pion sample                                                                                                        
+Bool_t StNpeRead::pass_cut_nsigmaPi(StDmesonTrack* trk)
+{
+  if(!trk) return kFALSE;
+  Float_t nSigmaP=trk->nSigmaPion();
+   
+  if(nSigmaP>cuts::nsigmap_low && nSigmaP<cuts::nsigmap_high)
+    return kTRUE;
+  else return kFALSE;
+ }
   
 Bool_t StNpeRead::pass_cut_ADC(Int_t trg, StDmesonTrack* trk)
 {
@@ -2299,7 +2347,7 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
      cout << "VZ OUT OF RANGE" << endl;
      return;
    }
-   cout << "Vz: " << vzbin << " size: " << hadVec[vzbin].size() << endl;
+   // DEBUG cout << "Vz: " << vzbin << " size: " << hadVec[vzbin].size() << endl;
    if(hadVec[vzbin].size() < maxBufferSize)
      hadVec[vzbin].push_back(evt);
    else
@@ -2307,14 +2355,14 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
        TRandom3* gRand = new TRandom3();
        Int_t eventPoint = (int) gRand->Uniform(0,maxBufferSize-1e-6);
        hadVec[vzbin][eventPoint] = evt;
+       delete gRand;
      }
-     cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
-   //DEBUG cout << hadVec.size();
+   // DEBUG cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
  }
 
  void StNpeRead::computeMixedEvents(StDmesonEvent* eEvt, StDmesonTrack* trk, Double_t vz)
  {
-   cout << "in compute" << endl;
+   //DEBUG  cout << "in compute" << endl;
    Float_t Phi = trk->gMom().phi();
    Float_t pT  = trk->gMom().perp();
    Float_t Eta = trk->gMom().pseudoRapidity();
@@ -2328,9 +2376,9 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    for(Int_t it=0; it < hadVec[vzbin].size(); it++)
      {
        StDmesonEvent* evt = hadVec[vzbin][it];
-       cout << "in mixed event loop" <<endl;
-       //       if(eEvt == evt)
-       //	 continue;
+       // DEBUG cout << "in mixed event loop" <<endl;
+       if(eEvt->eventId() == evt->eventId())
+      	 continue;
        
        TClonesArray* aTracks = 0;
        aTracks=evt->tracks();

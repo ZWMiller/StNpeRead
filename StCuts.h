@@ -188,5 +188,9 @@ namespace cuts
 	const Float_t hadDedx = 10;
 	const Float_t hadHitsFit = 15;
 	const Float_t hadDCA = 1.0;
+
+	// pion selection
+	const Float_t nsigmap_low=-0.1;
+        const Float_t nsigmap_high=0.1;
 }
 #endif

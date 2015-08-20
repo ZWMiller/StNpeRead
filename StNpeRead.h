@@ -87,6 +87,7 @@ class StNpeRead
     Int_t readEff(); // Read in Efficiencies from exterior files
     void addToHadBuffer(StDmesonEvent *); // Create a buffer for hadrons
     void computeMixedEvents(StDmesonEvent*,StDmesonTrack *, Double_t);
+    Bool_t pass_cut_nsigmaPi(StDmesonTrack *);
     //// end Add
 
   private:
@@ -410,6 +411,8 @@ class StNpeRead
 	TH3F *  mh3DelPhiInclWt[4];
 	TH3F *  mh3DelPhiPhotLSWt[4];
 	TH3F *  mh3DelPhiPhotUSWt[4];
+	TH3F *  mh3DelPhiHadHad[4];
+	TH1F *  mh1PtHadTracks[4];
 
 	TH3F *  mh3MixedDelPhi;
 	TH3F *  mh3MixedDelEta;
