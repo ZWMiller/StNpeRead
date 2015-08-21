@@ -160,6 +160,8 @@ void StNpeRead::bookObjects()
       mh2InvMassPtLS[trg]      = new TH2F(Form("mh2InvMassPtLS_%i",trg),"",1000,0,10,1000,0,10);
       mh2InvMassPtUS[trg]      = new TH2F(Form("mh2InvMassPtUS_%i",trg),"",1000,0,10,1000,0,10);
 
+      mh2nSigmaPionPt[trg]       = new TH2F(Form("mh2nSigmaPionPt_%i",trg),"",1000,-10,10,1000,0,10);
+
       mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
@@ -550,6 +552,7 @@ void StNpeRead::writeObjects()
        mh2InvMassPtE[trg]      -> Write();
        mh2InvMassPtUS[trg]     -> Write();
        mh2InvMassPtLS[trg]     -> Write();
+       mh2nSigmaPionPt[trg]    -> Write();
        mh3DelPhiIncl[trg]      -> Write();
        mh3DelPhiPhotLS[trg]    -> Write();
        mh3DelPhiPhotUS[trg]    -> Write();
@@ -1021,6 +1024,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
       mh2nSigmaEPt[trg]   -> Fill(nSig,pT);
       mh2TofPtAll[trg]    -> Fill(1/beta -1, pT);
       mh2InvMassPtAll[trg]-> Fill(m_m,pT);
+      mh2nSigmaPionPt[trg]-> Fill(trk->nSigmaPion(),pT);
       if(isHotTower(trk,trg)) // If in a hot tower, don't do any other checks, skip track
 	continue;
       if(pass_cut_GoodTrack(trk) && pass_cut_nsigmaE(trk) && pass_cut_Pt_Eta(trk) && pass_cut_ADC(trg,trk) &&
@@ -1043,11 +1047,10 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		}
 	    }
 	  // Mixed Event
-	  computeMixedEvents(mNpeEvent,trk,vz);
-	  if(!isAddedToBuffer)
+	  if(!isAddedToBuffer) // Only compute it once per event, to avoid calculating with possibly correlated tracks 
 	    {
-	      addToHadBuffer(mNpeEvent);
-	      isAddedToBuffer = kTRUE;
+	      computeMixedEvents(trk,vz);
+	      isAddedToBuffer=kTRUE;
 	    }
 
 	  Float_t ePhi = Phi;
@@ -1077,7 +1080,9 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	      
 	      if(trk != htrk && pass_cut_hTrack(htrk)) // Is this track pass as hadron track quality AND not the same track
 		{
-		 
+	
+		  // Make mixed events buffer
+		  addToHadBuffer(htrk,vz);
 
 		  Float_t hp    = htrk->pMom().mag();
 		  Float_t hbeta = htrk->btofBeta();
@@ -2340,27 +2345,27 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    return 1;
  }
 
- void StNpeRead::addToHadBuffer(StDmesonEvent * evt)
+void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
  {
-   Int_t vzbin = (Int_t)evt->primaryVertex().z()+35; // add 35 since there are 70 bins for -35,35. makes -35 = 0. 
+   Int_t vzbin = (Int_t)vz+35; // add 35 since there are 70 bins for -35,35. makes -35 = 0. 
    if(vzbin<0 || vzbin >70){
      cout << "VZ OUT OF RANGE" << endl;
      return;
    }
-   // DEBUG cout << "Vz: " << vzbin << " size: " << hadVec[vzbin].size() << endl;
+   //cout << "Vz: " << vzbin << " size: " << hadVec[vzbin].size() << endl;
    if(hadVec[vzbin].size() < maxBufferSize)
-     hadVec[vzbin].push_back(evt);
+     hadVec[vzbin].push_back(trk); // Stores the event itself, not the pointer
    else
      {
        TRandom3* gRand = new TRandom3();
        Int_t eventPoint = (int) gRand->Uniform(0,maxBufferSize-1e-6);
-       hadVec[vzbin][eventPoint] = evt;
+       hadVec[vzbin][eventPoint] = trk; // Stores the event itself, not the pointer
        delete gRand;
      }
-   // DEBUG cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
+   //cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
  }
 
- void StNpeRead::computeMixedEvents(StDmesonEvent* eEvt, StDmesonTrack* trk, Double_t vz)
+ void StNpeRead::computeMixedEvents(StDmesonTrack* trk, Double_t vz)
  {
    //DEBUG  cout << "in compute" << endl;
    Float_t Phi = trk->gMom().phi();
@@ -2373,35 +2378,26 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
    if(hadVec[vzbin].size()<=0)
      return;
    
+   cout << "at hadVec for" << endl;
    for(Int_t it=0; it < hadVec[vzbin].size(); it++)
      {
-       StDmesonEvent* evt = hadVec[vzbin][it];
-       // DEBUG cout << "in mixed event loop" <<endl;
-       if(eEvt->eventId() == evt->eventId())
-      	 continue;
+       StDmesonTrack* htrk = hadVec[vzbin][it]; 
+       Float_t hpT   = htrk->pMom().perp();
        
-       TClonesArray* aTracks = 0;
-       aTracks=evt->tracks();
-       for(Int_t ih = 0; ih < evt->nTracks(); ih++) // Want to loop over all tracks looking for hads. 
+       if(trk != htrk)
 	 {
-	   StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
-	   Float_t hpT   = htrk->pMom().perp();
+	   cout << "actually have mixed had track" << endl;
+	   Float_t hPhi = htrk->pMom().phi();
+	   Float_t hpT  = htrk->pMom().perp();
+	   Float_t hEta = htrk->pMom().pseudoRapidity();
 	   
-	   if(trk != htrk && pass_cut_hTrack(htrk))
-	     {
-	       cout << "actually have mixed had track" << endl;
-	       Float_t hPhi = htrk->pMom().phi();
-	       Float_t hpT  = htrk->pMom().perp();
-	       Float_t hEta = htrk->pMom().pseudoRapidity();
-	       
-	       Float_t dPhi = Phi-hPhi;
-	       if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-	       if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
-	       Float_t dEta = Eta - hEta;
-	       mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
-	       mh3MixedDelEta -> Fill(dEta, pT, hpT);
-	       mh3MixedEtaPhi -> Fill(dPhi, dEta, pT);
-	     }
+	   Float_t dPhi = Phi-hPhi;
+	   if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+	   if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
+	   Float_t dEta = Eta - hEta;
+	   mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
+	   mh3MixedDelEta -> Fill(dEta, pT, hpT);
+	   mh3MixedEtaPhi -> Fill(dPhi, dEta, pT);
 	 }
      }
  }

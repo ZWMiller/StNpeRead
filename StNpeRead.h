@@ -85,8 +85,8 @@ class StNpeRead
     Bool_t pass_cut_hTrack(StDmesonTrack *); // check for hadrons tracks
     Double_t getHadronWt(Double_t, Double_t);
     Int_t readEff(); // Read in Efficiencies from exterior files
-    void addToHadBuffer(StDmesonEvent *); // Create a buffer for hadrons
-    void computeMixedEvents(StDmesonEvent*,StDmesonTrack *, Double_t);
+    void addToHadBuffer(StDmesonTrack *, Double_t); // Create a buffer for hadrons
+    void computeMixedEvents(StDmesonTrack *, Double_t);
     Bool_t pass_cut_nsigmaPi(StDmesonTrack *);
     //// end Add
 
@@ -401,6 +401,7 @@ class StNpeRead
 	TH2F *  mh2InvMassPtE[4];
 	TH2F *  mh2InvMassPtUS[4];
 	TH2F *  mh2InvMassPtLS[4];
+	TH2F *  mh2nSigmaPionPt[4];
 	TH3F *  mh3nTracksZdcx[4];
 	TH3F *  mh3DelPhiIncl[4];
 	TH3F *  mh3DelPhiPhotLS[4];
@@ -441,7 +442,7 @@ class StNpeRead
 	Int_t numPtBins;
 	Int_t maxBufferSize;
 	Bool_t isAddedToBuffer;
-	std::vector<StDmesonEvent*> hadVec[70];
+	std::vector<StDmesonTrack*> hadVec[70];
 	ClassDef(StNpeRead, 1)
 	  };
 
