@@ -1096,9 +1096,9 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  /* DEBUG if(printCheck < 20){
 		    cout << "WEIGHT: " << wt << endl;
 		    printCheck++;}*/
-				   
-		  if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-		  if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
+		  dPhi = correct_dPhi(dPhi);
+		  //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+		  //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
 		  mh2PhiQPt[trg]     -> Fill(hPhi,hq*hpT);
 		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
 		  mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt);
@@ -1135,8 +1135,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  Float_t pT  = trk->gMom().perp();
           mh1PtHadTracks[trg] -> Fill(pT);
 
-	  for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) // Want to loop over all tracks looking for hads. Not going to double count, since there's only 1 NPE-e/evt on average \
-	    (in events with NPE, which are rare)                                                                                                                                                 
+	  for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) // Want to loop over all tracks looking for hads. Not going to double count, since there's only 1 NPE-e/evt on average (in events with NPE, which are rare)                                                                      
 	      {
 		StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
 		Float_t hpT   = htrk->pMom().perp();
@@ -1151,9 +1150,9 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		    /* DEBUG if(printCheck < 20){                                                                                                                                      
 		       cout << "WEIGHT: " << wt << endl;                                                                                                                                
 		       printCheck++;}*/
-
-		    if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-		    if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
+		    dPhi = correct_dPhi(dPhi);
+		    //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+		    //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
 		    mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT);
 		  }
 	      }
@@ -1221,8 +1220,9 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 		      Float_t dPhi  = ePhi-hPhi;
 		      Float_t hEta  = htrk->gMom().pseudoRapidity();
 		      Float_t wt = getHadronWt(hpT,hEta);
-		      if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-		      if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
+		      dPhi = correct_dPhi(dPhi);
+		      //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+		      //if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
 		      if(eq == pq)
 			{
 			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT);
@@ -2400,8 +2400,9 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
 	   cout << "actually have mixed had track" << endl;
 	   
 	   Float_t dPhi = Phi-hPhi;
-	   if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-	   if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
+	   dPhi = correct_dPhi(dPhi);
+	   //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
+	   //if(dPhi < -1*pi/2.)   dPhi = dPhi+2*pi;
 	   Float_t dEta = Eta - hEta;
 	   mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
 	   mh3MixedDelEta -> Fill(dEta, pT, hpT);
@@ -2409,3 +2410,10 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
 	 }
      }
  }
+
+Float_t StNpeRead::correct_dPhi(Float_t dP)
+{
+  if(dP > pi) dP = dP - 2*pi;
+  if(dP < pi) dP = dP + 2*pi;
+  return dP;
+}

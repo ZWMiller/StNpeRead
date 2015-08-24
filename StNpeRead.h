@@ -88,6 +88,7 @@ class StNpeRead
     void addToHadBuffer(StDmesonTrack *, Double_t); // Create a buffer for hadrons
     void computeMixedEvents(StDmesonTrack *, Double_t);
     Bool_t pass_cut_nsigmaPi(StDmesonTrack *);
+    Float_t correct_dPhi(Float_t); // controls wrap around, so I only have to change values in one place
     //// end Add
 
   private:
