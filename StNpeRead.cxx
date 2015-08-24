@@ -2348,18 +2348,28 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
 void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
  {
    Int_t vzbin = (Int_t)vz+35; // add 35 since there are 70 bins for -35,35. makes -35 = 0. 
+   Float_t Phi = trk->gMom().phi();
+   Float_t pT  = trk->gMom().perp();
+   Float_t Eta = trk->gMom().pseudoRapidity();
+
    if(vzbin<0 || vzbin >70){
      cout << "VZ OUT OF RANGE" << endl;
      return;
    }
    //cout << "Vz: " << vzbin << " size: " << hadVec[vzbin].size() << endl;
-   if(hadVec[vzbin].size() < maxBufferSize)
-     hadVec[vzbin].push_back(trk); // Stores the event itself, not the pointer
+   if(hadPhi[vzbin].size() < maxBufferSize)
+     {
+       hadPhi[vzbin].push_back(Phi); // Stores the event itself, not the pointer
+       hadEta[vzbin].push_back(Eta);
+       hadPt[vzbin].push_back(pT);
+     }      
    else
      {
        TRandom3* gRand = new TRandom3();
        Int_t eventPoint = (int) gRand->Uniform(0,maxBufferSize-1e-6);
-       hadVec[vzbin][eventPoint] = trk; // Stores the event itself, not the pointer
+       hadPhi[vzbin][eventPoint] = Phi;
+       hadEta[vzbin][eventPoint] = Eta;
+       hadPt[vzbin][eventPoint] = pT;
        delete gRand;
      }
    //cout << "Vz(after add): " << vzbin << " size: " << hadVec[vzbin].size() << endl;
@@ -2375,21 +2385,19 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
    if(vzbin<0 || vzbin>70)
      return;
    
-   if(hadVec[vzbin].size()<=0)
+   if(hadPhi[vzbin].size()<=0)
      return;
    
    cout << "at hadVec for" << endl;
-   for(Int_t it=0; it < hadVec[vzbin].size(); it++)
+   for(Int_t it=0; it < hadPhi[vzbin].size(); it++)
      {
-       StDmesonTrack* htrk = hadVec[vzbin][it]; 
-       Float_t hpT   = htrk->pMom().perp();
+       Float_t hPhi = hadPhi[vzbin][it];
+       Float_t hEta = hadEta[vzbin][it];
+       Float_t hpT  = hadPt[vzbin][it];
        
-       if(trk != htrk)
+       if((hPhi != Phi) || (hEta != Eta) || (hpT != pT)) // if not the exact same track
 	 {
 	   cout << "actually have mixed had track" << endl;
-	   Float_t hPhi = htrk->pMom().phi();
-	   Float_t hpT  = htrk->pMom().perp();
-	   Float_t hEta = htrk->pMom().pseudoRapidity();
 	   
 	   Float_t dPhi = Phi-hPhi;
 	   if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;

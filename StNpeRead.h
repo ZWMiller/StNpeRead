@@ -442,7 +442,9 @@ class StNpeRead
 	Int_t numPtBins;
 	Int_t maxBufferSize;
 	Bool_t isAddedToBuffer;
-	std::vector<StDmesonTrack*> hadVec[70];
+	std::vector<Float_t> hadPhi[70];
+	std::vector<Float_t> hadEta[70];
+	std::vector<Float_t> hadPt[70];
 	ClassDef(StNpeRead, 1)
 	  };
 
