@@ -2414,6 +2414,6 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
 Float_t StNpeRead::correct_dPhi(Float_t dP)
 {
   if(dP > pi) dP = dP - 2*pi;
-  if(dP < pi) dP = dP + 2*pi;
+  if(dP < -pi) dP = dP + 2*pi;
   return dP;
 }
