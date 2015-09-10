@@ -43,7 +43,7 @@ ClassImp(StNpeRead)
 //-----------------------------------------------------------------------------
 StNpeRead::StNpeRead(const char* outName)
 {
-  numPtBins = 14; maxBufferSize = 10;
+  numPtBins = 14; maxBufferSize = 15;
   writeXiaozhiHists = kFALSE; writeDataQA = kFALSE; writeRunQA = kFALSE; // Set flags for QA writing (to minimize file size when QA unnecessary)
   pi = 3.1415826;
   // Initialize the hadron weighting function (if can't find, exit)
@@ -1012,19 +1012,19 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
       if(iter!=runID_List.end())
         Run_ID=iter->second;
 
-      Float_t Phi = trk->gMom().phi();
+      Float_t Phi  = trk->gMom().phi();
       Float_t nSig = trk->nSigmaElectron();
-      Float_t pT = trk->gMom().perp();
-      Float_t q = trk->charge();
+      Float_t pT   = trk->gMom().perp();
+      Float_t q    = trk->charge();
       Float_t beta = trk->btofBeta();
       Float_t p    = trk->gMom().mag();
       Float_t m_m  = p*p*(1/(beta*beta)-1);
 
-      mh1PtAllTracks[trg] -> Fill(pT);
-      mh2nSigmaEPt[trg]   -> Fill(nSig,pT);
-      mh2TofPtAll[trg]    -> Fill(1/beta -1, pT);
-      mh2InvMassPtAll[trg]-> Fill(m_m,pT);
-      mh2nSigmaPionPt[trg]-> Fill(trk->nSigmaPion(),pT);
+      mh1PtAllTracks[trg]  -> Fill(pT);
+      mh2nSigmaEPt[trg]    -> Fill(nSig,pT);
+      mh2TofPtAll[trg]     -> Fill(1/beta -1, pT);
+      mh2InvMassPtAll[trg] -> Fill(m_m,pT);
+      mh2nSigmaPionPt[trg] -> Fill(trk->nSigmaPion(),pT);
       if(isHotTower(trk,trg)) // If in a hot tower, don't do any other checks, skip track
 	continue;
       if(pass_cut_GoodTrack(trk) && pass_cut_nsigmaE(trk) && pass_cut_Pt_Eta(trk) && pass_cut_ADC(trg,trk) &&
@@ -1061,8 +1061,11 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  Float_t zDist   = trk->zDist();
 	  Float_t epT  = pT;
 	  Float_t eq   = q;
+	  Float_t weight = getTrgEff(trg,pT)*ps; // Trigger Electron
+
+	  // Calculate weight from 
 	  
-	  mh1PtETracks[trg] -> Fill(epT);
+	  mh1PtETracks[trg] -> Fill(epT,weight); // prescale added to compare counts to Xiaozhi
 	  mh2PhiDistPt[trg] -> Fill(phiDist,epT);
 	  mh2ZDistPt[trg]   -> Fill(zDist,epT);
 	  mh2nPhiPt[trg]    -> Fill(nPhi,epT);
@@ -1092,18 +1095,20 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  Float_t hq    = htrk->charge();
 		  Float_t dPhi  = ePhi-hPhi;
 		  Float_t hEta  = htrk->gMom().pseudoRapidity();
-		  Float_t wt    = getHadronWt(hpT,hEta);
+		  Float_t wt    = getHadronWt(hpT,hEta)*weight; // Trigger Electron and Hadron
+
 		  /* DEBUG if(printCheck < 20){
 		    cout << "WEIGHT: " << wt << endl;
 		    printCheck++;}*/
+
 		  dPhi = correct_dPhi(dPhi);
 		  //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		  //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
 		  mh2PhiQPt[trg]     -> Fill(hPhi,hq*hpT);
-		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
+		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT,wt);
 		  mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt);
 		  if(!isInPair)
-		    mh3DelPhiPhotInclNP[trg] -> Fill(dPhi,epT,hpT);
+		    mh3DelPhiPhotInclNP[trg] -> Fill(dPhi,epT,hpT,wt);
 		  
 		}		  
 	    }
@@ -1153,7 +1158,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		    dPhi = correct_dPhi(dPhi);
 		    //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		    //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
-		    mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT);
+		    mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT,wt);
 		  }
 	      }
 	}
@@ -1200,14 +1205,16 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 	      Float_t ppoe = ptrk -> gMom().mag()/ptrk->e0();
 	      Float_t pq = ptrk -> charge();
 	      
+	      Float_t weight = getTrgEff(bTrg,epT)*ps; // Trigger Electron
+	      
 	      /// For Pair information sorting w/o Hadrons
 	      if(eq == pq)
 		{
-		  mh2InvMassPtLS[bTrg]  -> Fill(pair->m(),epT);
+		  mh2InvMassPtLS[bTrg]  -> Fill(pair->m(),epT,weight); // add prescale to compare counts with XB
 		}
 	      if(eq != pq)
 		{
-		  mh2InvMassPtUS[bTrg]  -> Fill(pair->m(),epT);
+		  mh2InvMassPtUS[bTrg]  -> Fill(pair->m(),epT,weight); // Same as previous comment
 		}
 	      
 	      for(Int_t ih = ip; ih < mNpeEvent->nTracks(); ih++) // loop over all tracks in the event
@@ -1219,23 +1226,23 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 		      Float_t hPhi = htrk->pMom().phi();
 		      Float_t dPhi  = ePhi-hPhi;
 		      Float_t hEta  = htrk->gMom().pseudoRapidity();
-		      Float_t wt = getHadronWt(hpT,hEta);
+		      Float_t wt = weight*getHadronWt(hpT,hEta); // Electron and Hadron  
 		      dPhi = correct_dPhi(dPhi);
 		      //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		      //if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
 		      if(eq == pq)
 			{
-			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT);
+			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			  mh3DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			   if(ptrk != htrk)
-			     mh3DelPhiPhotLSNP[bTrg] -> Fill(dPhi,epT,hpT);
+			     mh3DelPhiPhotLSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			}
 		      if(eq != pq)
 			{
-			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT);
+			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			  mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			  if(ptrk != htrk)
-			     mh3DelPhiPhotUSNP[bTrg] -> Fill(dPhi,epT,hpT);
+			    mh3DelPhiPhotUSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			}
 		    }
 		}
@@ -2328,6 +2335,28 @@ Double_t StNpeRead::getHadronWt(Double_t pt, Double_t eta){
 	Double_t wt = fEff->Eval(pt);
 	if(wt>0) return 1./wt;
 	else return 0.;
+}
+
+Double_t StNpeRead::getTrgEff(Int_t trg, Double_t pt)
+{
+  Double_t eff = 1;
+  if(trg == 0)
+    {
+      eff = TMath::Erf(pt - 2.41589); // from fitting XB Trig Eff
+    }
+
+  if(trg == 2)
+    {
+      if(pt < 4.5)
+	eff = TMath::Exp(-16.0543+3.3662*pt);
+      if(pt > 4.5)
+	eff = TMath::Erf(0.651713*pt-2.6212);
+    }
+
+  if(eff > 0)
+    return 1./eff;
+  else
+    return 0.;
 }
 
  Int_t StNpeRead::readEff()
