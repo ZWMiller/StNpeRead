@@ -178,8 +178,9 @@ void StNpeRead::bookObjects()
       mh3DelPhiInclWt[trg]->Sumw2();mh3DelPhiPhotLSWt[trg]->Sumw2();mh3DelPhiPhotUSWt[trg]->Sumw2();
       
       mh3DelPhiHadHad[trg]     = new TH3F(Form("mh3DelPhiHadHad_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiHadHadWt[trg]   = new TH3F(Form("mh3DelPhiHadHadWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
       mh1PtHadTracks[trg]      = new TH1F(Form("mh1PtHadTracks_%i",trg),"",400,0,20);
-      mh1PtHadTracks[trg]->Sumw2();
+      mh1PtHadTracks[trg]->Sumw2(); mh3DelPhiHadHad[trg]->Sumw2(); mh3DelPhiHadHadWt[trg]->Sumw2();
 
       mh3nTracksZdcx[trg]      = new TH3F(Form("mh3nTracksZdcx_%i",trg),"",200,0,20000,30,0,30,10,0,2);
 
@@ -189,7 +190,9 @@ void StNpeRead::bookObjects()
   mh3MixedDelPhi          = new TH3F("mh3MixedDelPhi","",400,-10,10,200,0,20,40,0,20);
   mh3MixedDelEta          = new TH3F("mh3MixedDelEta","",400,-10,10,200,0,20,40,0,20);
   mh3MixedEtaPhi          = new TH3F("mh3MixedEtaPhi","",400,-10,10,200,-5,5,40,0,20);
-  
+  mh3MixedDelPhiWt        = new TH3F("mh3MixedDelPhiWt","",400,-10,10,200,0,20,40,0,20);
+  mh3MixedDelEtaWt        = new TH3F("mh3MixedDelEtaWt","",400,-10,10,200,0,20,40,0,20);
+  mh3MixedEtaPhiWt        = new TH3F("mh3MixedEtaPhiWt","",400,-10,10,200,-5,5,40,0,20);
 
   /*
   Int_t bin1D[5]={1400,1400,1400,1400,1400}; Double_t xMin1D[5]={-7,-7,-7,-7,-7};  Double_t xMax1D[5]={7,7,7,7,7};
@@ -1009,6 +1012,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
   for(Int_t it=0;it<mNpeEvent->nTracks();it++)
     {
       Bool_t isInPair = kFALSE;
+      Bool_t isAddedToNorm = kFALSE;
       pileupCounter = 0; // Clear for each event
       StDmesonTrack* trk = (StDmesonTrack*)aTracks->At(it);
       int  Run_ID=-1;
@@ -1065,11 +1069,12 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  Float_t zDist   = trk->zDist();
 	  Float_t epT  = pT;
 	  Float_t eq   = q;
-	  Float_t weight = getTrgEff(trg,pT)*ps; // Trigger Electron
+	  Float_t weight = getTrgEff(trg,pT); // Trigger Electron
 
 	  // Calculate weight from 
 	  
-	  mh1PtETracks[trg] -> Fill(epT,weight); // prescale added to compare counts to Xiaozhi
+	  if(!isInPair)
+	    mh1PtETracks[trg] -> Fill(epT,weight); // prescale added to compare counts to Xiaozhi
 	  mh2PhiDistPt[trg] -> Fill(phiDist,epT);
 	  mh2ZDistPt[trg]   -> Fill(zDist,epT);
 	  mh2nPhiPt[trg]    -> Fill(nPhi,epT);
@@ -1109,11 +1114,14 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		  //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		  //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
 		  mh2PhiQPt[trg]     -> Fill(hPhi,hq*hpT);
-		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT,wt);
-		  mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt);
-		  if(!isInPair)
-		    mh3DelPhiPhotInclNP[trg] -> Fill(dPhi,epT,hpT,wt);
-		  
+		  //		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
+		  //mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt);
+		  if(!isInPair) // Not interested in any events part of pairs for semi-inclusive distrib
+		    {
+		      mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
+		      mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt); 
+		      mh3DelPhiPhotInclNP[trg] -> Fill(dPhi,epT,hpT,wt);
+		    }
 		}		  
 	    }
 	
@@ -1142,7 +1150,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  Float_t phi = trk->pMom().phi();
 	  Float_t pT  = trk->gMom().perp();
 	  Float_t eta = trk->gMom().pseudoRapidity();
-	  mh1PtHadTracks[trg] -> Fill(pT,ps);
+	  mh1PtHadTracks[trg] -> Fill(pT);
 
 	  for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) // Want to loop over all tracks looking for hads. Not going to double count, since there's only 1 NPE-e/evt on average (in events with NPE, which are rare)                                                                      
 	      {
@@ -1155,7 +1163,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		    Float_t hPhi  = htrk->pMom().phi();
 		    Float_t dPhi  = phi-hPhi;
 		    Float_t hEta  = htrk->gMom().pseudoRapidity();
-		    Float_t wt    = ps*getHadronWt(hpT,hEta);
+		    Float_t wt    = getHadronWt(hpT,hEta);
 		    /* DEBUG if(printCheck < 20){                                                                                                                                      
 		       cout << "WEIGHT: " << wt << endl;                                                                                                                                
 		       printCheck++;}*/
@@ -1209,7 +1217,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 	      Float_t ppoe = ptrk -> gMom().mag()/ptrk->e0();
 	      Float_t pq = ptrk -> charge();
 	      
-	      Float_t weight = getTrgEff(bTrg,epT)*ps; // Trigger Electron
+	      Float_t weight = getTrgEff(bTrg,epT); // Trigger Electron
 	      
 	      /// For Pair information sorting w/o Hadrons
 	      if(eq == pq)
@@ -1236,14 +1244,14 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 		      //if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
 		      if(eq == pq)
 			{
-			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT,wt);
+			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT);
 			  mh3DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			   if(ptrk != htrk)
 			     mh3DelPhiPhotLSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			}
 		      if(eq != pq)
 			{
-			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT,wt);
+			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT);
 			  mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			  if(ptrk != htrk)
 			    mh3DelPhiPhotUSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
@@ -2427,7 +2435,8 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
        Float_t hPhi = hadPhi[vzbin][it];
        Float_t hEta = hadEta[vzbin][it];
        Float_t hpT  = hadPt[vzbin][it];
-       
+       Float_t wt = getHadronWt(hpT,hEta);
+
        if((hPhi != Phi) || (hEta != Eta) || (hpT != pT)) // if not the exact same track
 	 {
 	   cout << "actually have mixed had track" << endl;
@@ -2440,6 +2449,9 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
 	   mh3MixedDelPhi -> Fill(dPhi, pT, hpT);
 	   mh3MixedDelEta -> Fill(dEta, pT, hpT);
 	   mh3MixedEtaPhi -> Fill(dPhi, dEta, pT);
+	   mh3MixedDelPhiWt -> Fill(dPhi, pT, hpT ,wt);
+           mh3MixedDelEtaWt -> Fill(dEta, pT, hpT ,wt);
+           mh3MixedEtaPhiWt -> Fill(dPhi, dEta, pT ,wt);
 	 }
      }
  }
