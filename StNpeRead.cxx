@@ -182,8 +182,16 @@ void StNpeRead::bookObjects()
       mh1PtHadTracks[trg]      = new TH1F(Form("mh1PtHadTracks_%i",trg),"",400,0,20);
       mh1PtHadTracks[trg]->Sumw2(); mh3DelPhiHadHad[trg]->Sumw2(); mh3DelPhiHadHadWt[trg]->Sumw2();
 
-      mh3nTracksZdcx[trg]      = new TH3F(Form("mh3nTracksZdcx_%i",trg),"",200,0,20000,30,0,30,10,0,2);
-
+      // Pileup Hists
+      for(Int_t q=0;q<4;q++)
+	{
+	  mh3nTracksZdcx[trg][q]   = new TH3F(Form("mh3nTracksZdcx_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
+	  mh3nTracksZdcxUS[trg][q] = new TH3F(Form("mh3nTracksZdcxUS_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
+	  mh3nTracksZdcxLS[trg][q] = new TH3F(Form("mh3nTracksZdcxLS_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
+	}      
+      mh2PtEZdcx[trg]          = new TH2F(Form("mh2PtEZdcx_%i",trg),"",200,0,20,200,0,20000);
+      mh2PtEZdcxUS[trg]        = new TH2F(Form("mh2PtEZdcxUS_%i",trg),"",200,0,20,200,0,20000);
+      mh2PtEZdcxLS[trg]        = new TH2F(Form("mh2PtEZdcxLS_%i",trg),"",200,0,20,200,0,20000);
     }
 
   /// Mixed Events
@@ -570,15 +578,25 @@ void StNpeRead::writeObjects()
        mh3DelPhiPhotLSWt[trg]  -> Write();
        mh3DelPhiPhotUSWt[trg]  -> Write();
        mh3DelPhiHadHad[trg]    -> Write();
+       mh3DelPhiHadHadWt[trg]  -> Write();
        mh1PtHadTracks[trg]     -> Write();
 
        // Pileup Histos
-       mh3nTracksZdcx[trg]     -> Write();
-       
+       mh2PtEZdcx[trg]         -> Write();
+       mh2PtEZdcxUS[trg]       -> Write();
+       mh2PtEZdcxLS[trg]       -> Write();
+       for(Int_t q = 0; q < 4; q++){
+	 mh3nTracksZdcx[trg][q]   -> Write();
+	 mh3nTracksZdcxUS[trg][q] -> Write();
+	 mh3nTracksZdcxLS[trg][q] -> Write();
+       }
        // Mixed Events
        mh3MixedDelPhi          -> Write();
        mh3MixedDelEta          -> Write();
        mh3MixedEtaPhi          -> Write();
+       mh3MixedDelPhiWt        -> Write();
+       mh3MixedDelEtaWt        -> Write();
+       mh3MixedEtaPhiWt        -> Write();
      }
    
    /* for(Int_t ii=0; ii<5; ii++)
@@ -1001,8 +1019,8 @@ void StNpeRead::zFillHists (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t ps ) 
 
 void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t ps ) // Fill histograms for events that are non-paired electrons                             
 {
-  Int_t pileupCounter = 0;
-  
+  Float_t hptCut[4]={0.3,0.5,1.0,1.5};
+
   TClonesArray* aTracks = 0;
   aTracks=mNpeEvent->tracks();
   TClonesArray* aPairs = 0;
@@ -1013,7 +1031,6 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
     {
       Bool_t isInPair = kFALSE;
       Bool_t isAddedToNorm = kFALSE;
-      pileupCounter = 0; // Clear for each event
       StDmesonTrack* trk = (StDmesonTrack*)aTracks->At(it);
       int  Run_ID=-1;
       map <int,int>::iterator iter=runID_List.find(mNpeEvent->runId());
@@ -1070,11 +1087,13 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 	  Float_t epT  = pT;
 	  Float_t eq   = q;
 	  Float_t weight = getTrgEff(trg,pT); // Trigger Electron
-
+	  Float_t zdc = mNpeEvent->ZDCx(); 
 	  // Calculate weight from 
 	  
-	  if(!isInPair)
-	    mh1PtETracks[trg] -> Fill(epT,weight); // prescale added to compare counts to Xiaozhi
+	  if(!isInPair){
+	    mh1PtETracks[trg] -> Fill(epT,weight); // Inclusive Norm
+	    mh2PtEZdcx[trg]   -> Fill(epT,zdc);    // To normalize ZDC bins by hadrons/trigger in pileup
+	  }
 	  mh2PhiDistPt[trg] -> Fill(phiDist,epT);
 	  mh2ZDistPt[trg]   -> Fill(zDist,epT);
 	  mh2nPhiPt[trg]    -> Fill(nPhi,epT);
@@ -1121,27 +1140,15 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		      mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
 		      mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt); 
 		      mh3DelPhiPhotInclNP[trg] -> Fill(dPhi,epT,hpT,wt);
+
+		      // For Pileup
+		      for(Int_t q = 0; q < 4; q++)
+			{
+			  if(hpT >= hptCut[q])
+			    mh3nTracksZdcx[trg][q]->Fill(epT,hpT,zdc);
+			}
 		    }
 		}		  
-	    }
-	
-	  Float_t hadptCuts[4]={0.3,0.5,1.0,1.5};
-	  Float_t hpTCut = 0.3;
-	  for(Int_t hC=0;hC<4;hC++) //  Study pileup as function of hpT cut
-	    {
-	      hpTCut = hadptCuts[hC];
-	      pileupCounter = 0;
-	      for(Int_t ih = 0; ih < mNpeEvent->nTracks(); ih++) 
-		{
-		  StDmesonTrack* htrk = (StDmesonTrack*)aTracks->At(ih);
-		  Float_t hpT   = htrk->pMom().perp();
-		  
-		  if(trk != htrk && pass_cut_hTrack(htrk) && hpT > hpTCut)
-		    {
-		      pileupCounter++;
-		    }
-		}
-	      mh3nTracksZdcx[trg]->Fill(mNpeEvent->ZDCx(),pileupCounter,hpTCut); // Fill on a per event basis
 	    }
 	}
       
@@ -1170,7 +1177,8 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
 		    dPhi = correct_dPhi(dPhi);
 		    //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		    //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
-		    mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT,wt);
+		    mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT);
+		    mh3DelPhiHadHadWt[trg] -> Fill(dPhi,pT,hpT,wt);
 		  }
 	      }
 	}
@@ -1179,6 +1187,8 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
   
 void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t ps )
 {
+  Float_t hptCut[4]={0.3,0.5,1.0,1.5};
+
   TClonesArray* aTracks = 0;
   TClonesArray* aPairs = 0;
   aPairs=mNpeEvent->electronPair();
@@ -1216,17 +1226,19 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 	      Float_t pPhi = ptrk -> gMom().phi();
 	      Float_t ppoe = ptrk -> gMom().mag()/ptrk->e0();
 	      Float_t pq = ptrk -> charge();
-	      
+	      Float_t zdc = mNpeEvent->ZDCx();
 	      Float_t weight = getTrgEff(bTrg,epT); // Trigger Electron
 	      
 	      /// For Pair information sorting w/o Hadrons
 	      if(eq == pq)
 		{
 		  mh2InvMassPtLS[bTrg]  -> Fill(pair->m(),epT,weight); // add prescale to compare counts with XB
+		  mh2PtEZdcxLS[bTrg]    -> Fill(epT,zdc);
 		}
 	      if(eq != pq)
 		{
 		  mh2InvMassPtUS[bTrg]  -> Fill(pair->m(),epT,weight); // Same as previous comment
+		  mh2PtEZdcxUS[bTrg]    -> Fill(epT,zdc);
 		}
 	      
 	      for(Int_t ih = ip; ih < mNpeEvent->nTracks(); ih++) // loop over all tracks in the event
@@ -1242,19 +1254,29 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
 		      dPhi = correct_dPhi(dPhi);
 		      //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
 		      //if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
-		      if(eq == pq)
+		      if(eq == pq && ptrk != htrk)
 			{
 			  mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT);
 			  mh3DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
-			   if(ptrk != htrk)
-			     mh3DelPhiPhotLSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
+			  if(ptrk != htrk)
+			    mh3DelPhiPhotLSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			}
-		      if(eq != pq)
+		      if(eq != pq && ptrk != htrk)
 			{
 			  mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT);
 			  mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
 			  if(ptrk != htrk)
 			    mh3DelPhiPhotUSNP[bTrg] -> Fill(dPhi,epT,hpT,wt);
+			}
+		      // For Pileup                                                                              
+                      for(Int_t q = 0; q < 4; q++)
+                        {
+                          if(hpT >= hptCut[q]){
+			    if(eq == pq && ptrk != htrk)
+			      mh3nTracksZdcxLS[bTrg][q]->Fill(epT,hpT,zdc);
+			    if(eq != pq && ptrk != htrk)
+                              mh3nTracksZdcxUS[bTrg][q]->Fill(epT,hpT,zdc);
+			  }
 			}
 		    }
 		}
