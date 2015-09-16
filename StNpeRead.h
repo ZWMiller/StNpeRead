@@ -59,7 +59,6 @@ class StNpeRead
   void zFillHists( Int_t, StDmesonEvent *, Double_t ); 
   void zFill_Inclusive( Int_t, StDmesonEvent*, Double_t );
   void zFill_Photonic( Int_t, StDmesonEvent*, Double_t );
-  void zFill_Pileup( Int_t, StDmesonEvent*, Double_t );
   //void zFillProjections( ); // MOVED TO OFFLINE RECONSTRUCTION
   //// end add
 
@@ -107,283 +106,6 @@ class StNpeRead
        TH1F *  mh1VzVPD_VPD;
        TH1F *	mh1Vz_VPDPS;
        
-       /* TH2F *	mh2Vz_VPD; */
-       /* TH2F *	mh2VPDVz_VPD; */
-       /* TH2F *	mh2Vz_VPDVPD; */
-       
-       /*	TH2F *	mh2TPCVzRunID[4];
-	TH2F *	mh2VPDVzRunID[4];
-	TH2F *	mh2TPCVz_VPDVz[4];
-	TH2F *	mh2ZDCRunID[4];
-	TH2F *	mh2BBCRunID[4];
-	TH2F *	mh2MultiPosRunID[4];
-	TH2F *	mh2MultiNegRunID[4];
-	TH2F*	mh2MultiRunID[4];
-	TH2F *  mh2PtRunID[4];
-	TH2F *	mh2EtaRunID[4];
-	TH2F *	mh2PhiRunID[4];
-	TH2F *	mh2BetaRunID[4];
-	TH2F *	mh2DedxRunID[4];
-	TH2F *	mh2Beta_RunID[4];
-	TH2F *	mh2NhitFitRunID[4];
-	TH2F *	mh2NhitDedxRunID[4];
-	TH2F *	mh2nsigmaERunID[4];
-	TH2F *	mh2gDCARunID[4];
-	TH2F *	mh2PhiVsEta_Range1[4];
-	TH2F *	mh2PhiVsEta_Range2[4];
-	TH2F *	mh2PhiVsEta_Range3[4];
-	TH1F *  mh1PassTofMatchRunID[4];
-	TH1F *  mh1WPassTofMatchRunID[4];
-	TH2F *	mh2VXY[4];
-	// profile
-
-	TProfile*	mh2TPCVzRunID_Profile[4];
-	TProfile*	mh2VPDVzRunID_Profile[4];
-
-	TProfile*	mh2ZDCRunID_Profile[4];
-	TProfile*	mh2BBCRunID_Profile[4];
-	TProfile*	mh2MultiPosRunID_Profile[4];
-	TProfile*	mh2MultiNegRunID_Profile[4];
-	TProfile *	mh2MultiRunID_Profile[4];
-	TProfile*        mh2PtRunID_Profile[4];
-	TProfile*	mh2EtaRunID_Profile[4];
-	TProfile*	mh2PhiRunID_Profile[4];
-	TProfile*	mh2BetaRunID_Profile[4];
-	TProfile*	mh2DedxRunID_Profile[4];
-	TProfile*	mh2Beta_RunID_Profile[4];
-	TProfile*	mh2NhitFitRunID_Profile[4];
-	TProfile*	mh2NhitDedxRunID_Profile[4];
-	TProfile*	mh2nsigmaERunID_Profile[4];
-	TProfile*	mh2gDCARunID_Profile[4];*/
-
-	//
- 
-       /*	TH2F *	mh2DSMADC_Inclusive[4];
-	TH2F*	mh2DSMADC_PhotoUnlike[4];
-	TH2F *	mh2DSMADC_Photolike[4];
-
-	TH2F *	mh2ADC0_Inclusive[4];
-	TH2F *	mh2ADC0_PhotoUnlike[4];
-	TH2F *	mh2ADC0_Photolike[4];
-
-	TH1F*	mh1TowerID_Inclusive[4];
-	TH1F*	mh1TowerID_cut_Inclusive[4];
-	TH1F*	mh1TowerID_all_Inclusive[4];
-
-	TH1F *	mh1TowerID_Inclusive_noHOt[4];
-	TH1F*	mh1TowerID_cut_Inclusive_noHOt[4];
-	TH1F*	mh1TowerID_all_Inclusive_noHOt[4];
-
-	TH2F *  mh2ADC0_DSMadcInclusive[4];
-        TH2F *  mh2ADC0_DSMadcPhotoUnlike[4];
-        TH2F *  mh2ADC0_DSMadcPhotolike[4];
-
-        TH2F* mh2InvMassPoeUnlike[4];
-	TH2F* mh2PoeUnlike[4];
-	TH2F* mh2InvMassPoelike[4];  
-	TH2F* mh2Poelike[4];
-
-	TH2F* mh2InvMassDzUnlike[4];
-	TH2F* mh2DzUnlike[4];
-	TH2F* mh2InvMassDzlike[4];  
-	TH2F* mh2Dzlike[4];
-    
-	TH2F* mh2InvMassDpUnlike[4];
-	TH2F* mh2DpUnlike[4];
-	TH2F* mh2InvMassDplike[4];  
-	TH2F* mh2Dplike[4];
-
-	TH2F*	mh2InvMassEMCUnlike[4];
-	TH2F* mh2InvMassEMClike[4];    
-	TH2F*	mh2InvMassNEMCUnlike[4];
-	TH2F* mh2InvMassNEMClike[4];    
-	TH2F*	mh2InvMassNEEMCUnlike[4];
-	TH2F* mh2InvMassNEEMClike[4];    
-	TH2F*	mh2InvMassNPEMCUnlike[4];
-	TH2F* mh2InvMassNPEMClike[4];    
-
-	TH2F*	mh2NEtaUnlike[4];
-	TH2F*	mh2NEtalike[4];
-	TH2F*	mh2NPhiUnlike[4];
-	TH2F*	mh2NPhilike[4];
-
-	TH3F* mh3nSigPart_EMCUnlike[4];
-	TH3F* mh3nSigPart_EMClike[4];
-
-	TH3F* mh3nSigPart_TREMCUnlike[4];
-	TH3F* mh3nSigPart_TREMClike[4];
-	TH3F* mh3nSigPart_ADCTREMCUnlike[4];
-	TH3F* mh3nSigPart_ADCTREMClike[4];
-
-	TH3F* mh3nSigEUnlike[4];
-	TH3F* mh3nSigPartUnlike[4];
-	TH3F* mh3nSigElike[4];  
-	TH3F* mh3nSigPartlike[4];
-
-
-	//all cuts apllied
-	TH2F*     mh2DsmADCUnlike[4];
-	TH2F*     mh2DsmADClike[4];
-	TH2F*  mh2Btowadc0[4];
-	TH3F*	mh3EMC_PartUnlike[4];
-	TH3F*	mh3EMC_Partlike[4];
-	TH3F*	mh3EMC_ADCPartUnlike[4];
-	TH3F*	mh3EMC_ADCPartlike[4];
-
-
-	TH3F* mh3EtaPhiUnlike[4];
-	TH3F* mh3EtaPhilike[4];	
-	TH2F * mh2InvMasslike[4];
-	TH2F * mh2InvMassUnlike[4];
-	TH2F* mh2nSigmaElec[4];
-	TH1F * mh1electronPt[4];
-
-	//data QA%
-	TH2F*	mPhi_ptUnlike[4];
-	TH2F*	mEta_ptUnlike[4];
-	TH2F*	mPhi_ptlike[4];
-	TH2F*	mEta_ptlike[4];
-	
-	TH2F*	mHitFit_ptUnlike[4];
-	TH2F*	mNSMDEta_ptUnlike[4];
-	TH2F*	mHitsDedxUnlike[4];
-	TH2F*	mHitFit_ptlike[4];
-	TH2F* 	mNSMDEta_ptlike[4];
-	TH2F* 	mHitsDedxlike[4];
-	
-	TH1F*	mNTrackUnlike[4];
-	TH1F* 	mNTrack_cutUnlike[4];
-	TH1F* 	mNTracklike[4];
-	TH1F* 	mNTrack_cutlike[4];
-	TH2F* 	mFitPos_ptlike[4];
-	TH2F* 	mgDcalike[4];
-	TH2F* 	mFitPos_ptUnlike[4];
-	TH2F* 	mgDcaUnlike[4];
-	
-	TH2F* mNSMDPhi_ptUnlike[4];
-	TH2F* mNSMDPhi_ptlike[4];
-	TH1F* mNTrack_cut25Unlike[4];
-	TH1F* mNTrack_cut25like[4];
-
-	TH1F* mNTrack_cut20Unlike[4];
-        TH1F* mNTrack_cut20like[4];
-	
-	TH2F* mNsigElike[4];
-	TH2F* mNsigEUnlike[4];
-	
-	TH2F* mDedxlike[4];
-	TH2F* mDedxUnlike[4];
-	TH2F *mPoelike[4];
-	TH2F *mPoeUnlike[4]; 	
-	TH1F *mh1Vz[4];
-	TH1F *mh1VzPS[4];
-	TH2F* mh2Vxy[4]; 
-	TH1F *mh1Vz_BBCMB;
-	TH1F *mh1VPDVz_BBCMB;
-	TH1F *mh1Vz_BBCMBTOF0;
-	TH1F *mh1VPDVz_BBCMBTOF0;
-	TH1F *mh1Vz_BBCMBPS;
-	TH1F *mh1Vz_BBCMBTOF0PS;
-	TH2F * HT0_HT2;	
-	//-----------------------------low pt-----------------------------------------
-	TH2F *	mh2nSigmaElec_VPD;
-	TH2F *  mh2_PionnSigmaElecDiff_VPD;
-	TH2F *  mh2_MergrePionnSigmaElecDiff_VPD;
-	TH3F *	mh3_nSigmaElec_Beta_VPD;
-
-
-	TH2F * mh2_nSigmaElec_BetaP_VPD;
-	TH2F *  mh2_nSigmaElec_BetaPt_VPD;
-	TH2F *  mh2_KaonnSigmaElecDiff_VPD;
-	TH2F *  mh2_ProtonnSigmaElecDiff_VPD;
-	TH2F *    mh2_nsigamE_pt_VPD;
-	TH2F * mh2_nsigamE_p_VPD;
-
-	TH1F *	mh1electronPt_VPD;
-	TH1F *  mh1electronPt_PSVPD;
-	TH1F *	mh1electronPt_MBPSVPD;
-	TH2F *  mh2electronPtEta_VPD;
-	TH2F *  mh2_InvMass_VPD;
-	TH2F *	mh2_Pion_nSigmaElec_VPD;
-	TH2F *	mh2_Kaon_nSigmaElec_VPD;
-	TH2F *	mh2_Proton_nSigmaElec_VPD;
-
-	TH2F *  mh2_KaonnSigmaEle_eta_VPD;
-	TH2F *  mh2_ProtonnSigmaEle_eta_VPD;
-	TH2F *  mh2_PionnSigmaEle_eta_VPD;
-
-	TH2F * mh2_InvMass_KaonUnlike_VPD;
-	TH2F * mh2_NsigmaE_KaonUnlike_VPD;
-	TH2F * mh2_InvMass_Kaonlike_VPD;
-	TH2F * mh2_NsigmaE_Kaonlike_VPD;
-	
-	TH2F * 	mh2InvTofBetaUnlike_VPD ;
-	TH2F * 	mh2InvTofBetalike_VPD ;
-	
-	TH3F * 	mh3TofBetaUnlike_VPD ;
-	TH3F * 	mh3TofBetalike_VPD;
-	TH3F * mh3TofBeta_PartnerUnlike_VPD;
-	TH3F *	mh3TofBeta_Partnerlike_VPD;
-
-	TH3F *	mh3TofBeta_CutPartnerUnlike_VPD;
-	TH3F *	mh3TofBeta_CutPartnerlike_VPD;
-	// no  yloacal                                                                                                                   
-	TH2F * 	mh2InvTofYlocalUnlike_VPD ;
-	TH2F * 	mh2InvTofYlocallike_VPD ;
-	
-	TH2F * 	mh2TofYlocalUnlike_VPD ;
-	TH2F * 	mh2TofYlocallike_VPD ;
-	TH2F *	mTofBetaUnlike_match_VPD;
-	TH2F *  mTofBetalike_match_VPD;
-	// all the cuts applied                                                                                                          
-	TH2F * 	mh2InvUnlike_VPD ;
-	TH2F * 	mh2Invlike_VPD ;
-
-	TH2F *  mh2InvUnlike_PSVPD ;
-        TH2F *  mh2Invlike_PSVPD ;
-
-	TH2F *	mh2InvPartnerUnlike_VPD;
-	TH2F *  mh2InvPartnerlike_VPD;
-	TH2F *	mh2CutPartnerUnlike_VPD;
-	TH2F *	mh2CutPartnerlike_VPD;
-	TH2F * 	mh2nSigePartnerUnlike_VPD ;
-	TH2F * 	mh2nSigePartnerlike_VPD ;
-	TH3F* mh3nSigmaEUnlike_VPD;
-	TH3F* mh3nSigmaElike_VPD;
-	//	QA
-	TH2F *   mPhi_ptUnlike_VPD;
-	TH2F * mPhi_ptlike_VPD;
-
-	TH2F *   mEta_ptUnlike_VPD;
-	TH2F *  mEta_ptlike_VPD;
-	
-	TH2F *  mTofBetaUnlike_VPD;
-	TH2F *  mTofBetalike_VPD;
-	
-	TH2F *   mTofYlocalUnlike_VPD;
-	TH2F *  mTofYlocallike_VPD;
-	
-	TH2F *  mHitFit_ptUnlike_VPD;
-	TH2F *  mHitFit_ptlike_VPD;
-	
-	TH2F *  mHitsDedxUnlike_VPD;
-	TH2F * mHitsDedxlike_VPD;
-	
-	TH2F *  mgDcalike_VPD;
-	TH2F *  mgDcaUnlike_VPD;
-	
-	TH2F *  mNsigElike_VPD;
-	TH2F *  mNsigEUnlike_VPD;
-	
-	TH2F *  mDedxlike_VPD;
-	TH2F * mDedxUnlike_VPD;
-
-	TH1F*	mNTrack_cutUnlike_VPD;
-	TH1F*	mNTrack_cutlike_VPD;
-	
-	TH2F *	mFitPos_ptUnlike_VPD;
-	TH2F *	mFitPos_ptlike_VPD;
-       */
 	// Added Z. Miller
 	//TH1F *  testHist1D[5];
 	//TH2F *  testHist2D[5];
@@ -407,6 +129,8 @@ class StNpeRead
 	TH3F *  mh3nTracksZdcx[4][4];
 	TH3F *  mh3nTracksZdcxUS[4][4];
 	TH3F *  mh3nTracksZdcxLS[4][4];
+	TH3F *  mh3nTracksZdcxHad[4][4];
+        TH2F *  mh2PtEZdcxHad[4];
 	TH2F *  mh2PtEZdcx[4];
 	TH2F *  mh2PtEZdcxUS[4];
 	TH2F *  mh2PtEZdcxLS[4];
@@ -429,6 +153,13 @@ class StNpeRead
 	TH3F *  mh3MixedDelPhiWt;
         TH3F *  mh3MixedDelEtaWt;
         TH3F *  mh3MixedEtaPhiWt;
+
+	// For comparison to 2.5-3.5 GeV bin prev analysis
+	TH1F *  mh1delPhiIncl;
+	TH1F *  mh1delPhiUS;
+	TH1F *  mh1delPhiLS;
+	TH1F *  mh1delPhiHad;
+	TH1F *  mh1TrigCount;
 
 	//Projections[ptbin][trig]
 	/*TH1D *  projHPhi[14][4];
