@@ -163,32 +163,32 @@ void StNpeRead::bookObjects()
 
       mh2nSigmaPionPt[trg]       = new TH2F(Form("mh2nSigmaPionPt_%i",trg),"",1000,-10,10,1000,0,10);
 
-      mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotUSNP[trg]   = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotLSNP[trg]   = new TH3F(Form("mh3DelPhiPhotLSNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotInclNP[trg] = new TH3F(Form("mh3DelPhiPhotInclNP_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotUSNP[trg]   = new TH3F(Form("mh3DelPhiPhotUSNP_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotLSNP[trg]   = new TH3F(Form("mh3DelPhiPhotLSNP_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotInclNP[trg] = new TH3F(Form("mh3DelPhiPhotInclNP_%i",trg),"",200,-10,10,200,0,20,400,0,20);
       mh3DelPhiIncl[trg]->Sumw2();mh3DelPhiPhotLS[trg]->Sumw2();mh3DelPhiPhotUS[trg]->Sumw2();
       mh3DelPhiPhotInclNP[trg]->Sumw2();mh3DelPhiPhotLSNP[trg]->Sumw2();mh3DelPhiPhotUSNP[trg]->Sumw2();
 
-      mh3DelPhiInclWt[trg]     = new TH3F(Form("mh3DelPhiInclWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotLSWt[trg]   = new TH3F(Form("mh3DelPhiPhotLSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiPhotUSWt[trg]   = new TH3F(Form("mh3DelPhiPhotUSWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiInclWt[trg]     = new TH3F(Form("mh3DelPhiInclWt_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotLSWt[trg]   = new TH3F(Form("mh3DelPhiPhotLSWt_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiPhotUSWt[trg]   = new TH3F(Form("mh3DelPhiPhotUSWt_%i",trg),"",200,-10,10,200,0,20,400,0,20);
       mh3DelPhiInclWt[trg]->Sumw2();mh3DelPhiPhotLSWt[trg]->Sumw2();mh3DelPhiPhotUSWt[trg]->Sumw2();
       
-      mh3DelPhiHadHad[trg]     = new TH3F(Form("mh3DelPhiHadHad_%i",trg),"",200,-10,10,200,0,20,40,0,20);
-      mh3DelPhiHadHadWt[trg]   = new TH3F(Form("mh3DelPhiHadHadWt_%i",trg),"",200,-10,10,200,0,20,40,0,20);
+      mh3DelPhiHadHad[trg]     = new TH3F(Form("mh3DelPhiHadHad_%i",trg),"",200,-10,10,200,0,20,400,0,20);
+      mh3DelPhiHadHadWt[trg]   = new TH3F(Form("mh3DelPhiHadHadWt_%i",trg),"",200,-10,10,200,0,20,400,0,20);
       mh1PtHadTracks[trg]      = new TH1F(Form("mh1PtHadTracks_%i",trg),"",400,0,20);
       mh1PtHadTracks[trg]->Sumw2(); mh3DelPhiHadHad[trg]->Sumw2(); mh3DelPhiHadHadWt[trg]->Sumw2();
 
       // Pileup Hists
       for(Int_t q=0;q<4;q++)
 	{
-	  mh3nTracksZdcx[trg][q]    = new TH3F(Form("mh3nTracksZdcx_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
-	  mh3nTracksZdcxUS[trg][q]  = new TH3F(Form("mh3nTracksZdcxUS_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
-	  mh3nTracksZdcxLS[trg][q]  = new TH3F(Form("mh3nTracksZdcxLS_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
-	  mh3nTracksZdcxHad[trg][q] = new TH3F(Form("mh3nTracksZdcxHad_%i_%i",trg,q),"",200,0,20,40,0,20,200,0,20000);
+	  mh3nTracksZdcx[trg][q]    = new TH3F(Form("mh3nTracksZdcx_%i_%i",trg,q),"",200,0,20,400,0,20,200,0,20000);
+	  mh3nTracksZdcxUS[trg][q]  = new TH3F(Form("mh3nTracksZdcxUS_%i_%i",trg,q),"",200,0,20,400,0,20,200,0,20000);
+	  mh3nTracksZdcxLS[trg][q]  = new TH3F(Form("mh3nTracksZdcxLS_%i_%i",trg,q),"",200,0,20,400,0,20,200,0,20000);
+	  mh3nTracksZdcxHad[trg][q] = new TH3F(Form("mh3nTracksZdcxHad_%i_%i",trg,q),"",200,0,20,400,0,20,200,0,20000);
 	  mh3nTracksZdcx[trg][q]->Sumw2(); mh3nTracksZdcxUS[trg][q]->Sumw2(); mh3nTracksZdcxLS[trg][q]->Sumw2();mh3nTracksZdcxHad[trg][q]->Sumw2();
 	}      
       mh2PtEZdcx[trg]          = new TH2F(Form("mh2PtEZdcx_%i",trg),"",200,0,20,200,0,20000);
@@ -199,12 +199,12 @@ void StNpeRead::bookObjects()
     }
 
   /// Mixed Events
-  mh3MixedDelPhi          = new TH3F("mh3MixedDelPhi","",400,-10,10,200,0,20,40,0,20);
-  mh3MixedDelEta          = new TH3F("mh3MixedDelEta","",400,-10,10,200,0,20,40,0,20);
-  mh3MixedEtaPhi          = new TH3F("mh3MixedEtaPhi","",400,-10,10,200,-5,5,40,0,20);
-  mh3MixedDelPhiWt        = new TH3F("mh3MixedDelPhiWt","",400,-10,10,200,0,20,40,0,20);
-  mh3MixedDelEtaWt        = new TH3F("mh3MixedDelEtaWt","",400,-10,10,200,0,20,40,0,20);
-  mh3MixedEtaPhiWt        = new TH3F("mh3MixedEtaPhiWt","",400,-10,10,200,-5,5,40,0,20);
+  mh3MixedDelPhi          = new TH3F("mh3MixedDelPhi","",400,-10,10,200,0,20,400,0,20);
+  mh3MixedDelEta          = new TH3F("mh3MixedDelEta","",400,-10,10,200,0,20,400,0,20);
+  mh3MixedEtaPhi          = new TH3F("mh3MixedEtaPhi","",400,-10,10,200,-5,5,400,0,20);
+  mh3MixedDelPhiWt        = new TH3F("mh3MixedDelPhiWt","",400,-10,10,200,0,20,400,0,20);
+  mh3MixedDelEtaWt        = new TH3F("mh3MixedDelEtaWt","",400,-10,10,200,0,20,400,0,20);
+  mh3MixedEtaPhiWt        = new TH3F("mh3MixedEtaPhiWt","",400,-10,10,200,-5,5,400,0,20);
 
   // 1D histos for 2.5 to 3.5 GeV epT bin, HT0, hPt>0.3 GeV, For comparison with previous analysis
   mh1delPhiIncl         = new TH1F("mh1delPhiIncl","",400,-10,10);  // TrigCount bin 1
