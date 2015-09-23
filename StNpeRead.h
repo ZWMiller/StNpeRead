@@ -111,7 +111,7 @@ class StNpeRead
 	//TH2F *  testHist2D[5];
 	TH1F *  mh1PtAllTracks[4];
 	TH1F *  mh1PtETracks[4];
-	TH2F *  mh2nSigmaEPt[4];
+	/*	TH2F *  mh2nSigmaEPt[4];
 	TH2F *  mh2nSigmaEPt_eID[4];
 	TH2F *  mh2PoePt[4];
 	TH2F *  mh2nPhiPt[4];
@@ -120,7 +120,7 @@ class StNpeRead
 	TH2F *  mh2ZDistPt[4];
 	TH2F *  mh2PhiQPt[4];
 	TH2F *  mh2TofPtAll[4];
-	TH2F *  mh2TofPtE[4];
+	TH2F *  mh2TofPtE[4];*/
 	TH2F *  mh2InvMassPtAll[4];
 	TH2F *  mh2InvMassPtE[4];
 	TH2F *  mh2InvMassPtUS[4];
