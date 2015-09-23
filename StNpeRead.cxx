@@ -143,7 +143,7 @@ void StNpeRead::bookObjects()
   /// Z. Histos
   for(Int_t trg=0; trg<4; trg+=2)
     {
-      cout << trg << endl;
+      //cout << trg << endl;
       mh1PtAllTracks[trg]      = new TH1F(Form("mh1PtAllTracks_%i",trg),"",400,0,20);
       mh1PtETracks[trg]        = new TH1F(Form("mh1PtETracks_%i",trg),"",400,0,20);
       // mh2nSigmaEPt[trg]        = new TH2F(Form("mh2nSigmaEPt_%i",trg),"",600,-30,30,400,0,20);
@@ -164,7 +164,7 @@ void StNpeRead::bookObjects()
 
       mh2nSigmaPionPt[trg]       = new TH2F(Form("mh2nSigmaPionPt_%i",trg),"",1000,-10,10,1000,0,10);
 
-      cout << "at delPhi" << endl;
+      //cout << "at delPhi" << endl;
       mh3DelPhiIncl[trg]       = new TH3F(Form("mh3DelPhiIncl_%i",trg),"",200,-10,10,200,0,20,100,0.,10.);
       mh3DelPhiPhotLS[trg]     = new TH3F(Form("mh3DelPhiPhotLS_%i",trg),"",200,-10,10,200,0,20,100,0.,10.);
       mh3DelPhiPhotUS[trg]     = new TH3F(Form("mh3DelPhiPhotUS_%i",trg),"",200,-10,10,200,0,20,100,0.,10.);
@@ -184,11 +184,11 @@ void StNpeRead::bookObjects()
       mh1PtHadTracks[trg]      = new TH1F(Form("mh1PtHadTracks_%i",trg),"",100,0.,10.);
       mh1PtHadTracks[trg]->Sumw2(); mh3DelPhiHadHad[trg]->Sumw2(); mh3DelPhiHadHadWt[trg]->Sumw2();
       
-      cout << "at pileup" << endl;
+      //cout << "at pileup" << endl;
       // Pileup Hists
       for(Int_t q=0;q<1;q++)
 	{
-	  cout << "pileup count: " << q << endl;
+	  //  cout << "pileup count: " << q << endl;
 	  mh3nTracksZdcx[trg][q]    = new TH3F(Form("mh3nTracksZdcx_%i_%i",trg,q),"",200,0,20,100,0.,10.,200,0,20000);
 	  mh3nTracksZdcxUS[trg][q]  = new TH3F(Form("mh3nTracksZdcxUS_%i_%i",trg,q),"",200,0,20,100,0.,10.,200,0,20000);
 	  mh3nTracksZdcxLS[trg][q]  = new TH3F(Form("mh3nTracksZdcxLS_%i_%i",trg,q),"",200,0,20,100,0.,10.,200,0,20000);
@@ -200,7 +200,7 @@ void StNpeRead::bookObjects()
       mh2PtEZdcxLS[trg]        = new TH2F(Form("mh2PtEZdcxLS_%i",trg),"",200,0,20,200,0,20000);
       mh2PtEZdcxHad[trg]       = new TH2F(Form("mh2PtEZdcxHad_%i",trg),"",200,0,20,200,0,20000);
       mh2PtEZdcx[trg]->Sumw2(); mh2PtEZdcxUS[trg]->Sumw2(); mh2PtEZdcxLS[trg]->Sumw2(); mh2PtEZdcxHad[trg]->Sumw2();
-      cout << "end " << trg << endl;
+      //cout << "end " << trg << endl;
    }
  
   
@@ -226,41 +226,41 @@ void StNpeRead::writeObjects()
 {
    mOutputFile->cd();
 
-   cout << "writeObjects Top." << endl;
+   //cout << "writeObjects Top." << endl;
    /// Z. Histos
    for(Int_t trg=0; trg<4; trg+=2)
      {
-       cout<< "writeObjects Trg. " << trg << endl;
-       mh1PtAllTracks[trg]     -> Write(); cout << "1 ";
-       mh1PtETracks[trg]       -> Write(); cout << "2 "; 
-       // mh2nSigmaEPt[trg]       -> Write(); cout << "3 "; 
-       //mh2nSigmaEPt_eID[trg]   -> Write(); cout << "4 "; 
-       //mh2PoePt[trg]           -> Write(); cout << "5 "; 
-       //mh2nPhiPt[trg]          -> Write(); cout << "6 "; 
-       //mh2nEtaPt[trg]          -> Write(); cout << "7 "; 
-       //mh2PhiDistPt[trg]       -> Write(); cout << "8 "; 
-       //mh2ZDistPt[trg]         -> Write(); cout << "9 "; 
-       //mh2PhiQPt[trg]          -> Write(); cout << "10 "; 
-       //mh2TofPtAll[trg]        -> Write(); cout << "11 "; 
-       //mh2TofPtE[trg]          -> Write(); cout << "12 "; 
-       mh2InvMassPtAll[trg]    -> Write(); cout << "13 "; 
-       mh2InvMassPtE[trg]      -> Write(); cout << "14 "; 
-       mh2InvMassPtUS[trg]     -> Write(); cout << "15 "; 
-       mh2InvMassPtLS[trg]     -> Write(); cout << "16 ";
-       mh2nSigmaPionPt[trg]    -> Write(); cout << "17 "; 
-       mh3DelPhiIncl[trg]      -> Write(); cout << "18 "; 
-       mh3DelPhiPhotLS[trg]    -> Write(); cout << "19 "; 
-       mh3DelPhiPhotUS[trg]    -> Write(); cout << "20 "; 
-       mh3DelPhiPhotUSNP[trg]  -> Write(); cout << "21 "; 
-       mh3DelPhiPhotLSNP[trg]  -> Write(); cout << "22 "; 
-       mh3DelPhiPhotInclNP[trg]-> Write(); cout << "23 "; 
-       mh3DelPhiInclWt[trg]    -> Write(); cout << "24 "; 
-       mh3DelPhiPhotLSWt[trg]  -> Write(); cout << "25 "; 
-       mh3DelPhiPhotUSWt[trg]  -> Write(); cout << "26 "; 
-       mh3DelPhiHadHad[trg]    -> Write(); cout << "27 "; 
-       mh3DelPhiHadHadWt[trg]  -> Write(); cout << "28 "; 
-       mh1PtHadTracks[trg]     -> Write(); cout << "29 "; 
-       cout << "at pileup" << endl;
+       // cout<< "writeObjects Trg. " << trg << endl;
+       mh1PtAllTracks[trg]     -> Write(); 
+       mh1PtETracks[trg]       -> Write(); 
+       // mh2nSigmaEPt[trg]       -> Write();
+       //mh2nSigmaEPt_eID[trg]   -> Write();
+       //mh2PoePt[trg]           -> Write();
+       //mh2nPhiPt[trg]          -> Write();
+       //mh2nEtaPt[trg]          -> Write();
+       //mh2PhiDistPt[trg]       -> Write();
+       //mh2ZDistPt[trg]         -> Write();
+       //mh2PhiQPt[trg]          -> Write();
+       //mh2TofPtAll[trg]        -> Write();
+       //mh2TofPtE[trg]          -> Write();
+       mh2InvMassPtAll[trg]    -> Write(); 
+       mh2InvMassPtE[trg]      -> Write(); 
+       mh2InvMassPtUS[trg]     -> Write(); 
+       mh2InvMassPtLS[trg]     -> Write(); 
+       mh2nSigmaPionPt[trg]    -> Write(); 
+       mh3DelPhiIncl[trg]      -> Write(); 
+       mh3DelPhiPhotLS[trg]    -> Write(); 
+       mh3DelPhiPhotUS[trg]    -> Write(); 
+       mh3DelPhiPhotUSNP[trg]  -> Write(); 
+       mh3DelPhiPhotLSNP[trg]  -> Write(); 
+       mh3DelPhiPhotInclNP[trg]-> Write(); 
+       mh3DelPhiInclWt[trg]    -> Write(); 
+       mh3DelPhiPhotLSWt[trg]  -> Write(); 
+       mh3DelPhiPhotUSWt[trg]  -> Write(); 
+       mh3DelPhiHadHad[trg]    -> Write(); 
+       mh3DelPhiHadHadWt[trg]  -> Write(); 
+       mh1PtHadTracks[trg]     -> Write(); 
+      
        // Pileup Histos
        mh2PtEZdcx[trg]         -> Write();
        mh2PtEZdcxUS[trg]       -> Write();
@@ -274,7 +274,7 @@ void StNpeRead::writeObjects()
 	 mh3nTracksZdcxHad[trg][q] -> Write();
        }
      }
-   cout << "mixed event write." << endl;
+   
    // Mixed Events
    mh3MixedDelPhi          -> Write();
    mh3MixedDelEta          -> Write();
@@ -283,7 +283,7 @@ void StNpeRead::writeObjects()
    mh3MixedDelEtaWt        -> Write();
    mh3MixedEtaPhiWt        -> Write();
    
-   cout << "25-35" << endl;
+   
    // 1D Hists for comparison to old analysis 2.5-3.5 GeV epT bin
    mh1delPhiIncl  -> Write();
    mh1delPhiUS    -> Write();
@@ -291,7 +291,7 @@ void StNpeRead::writeObjects()
    mh1delPhiHad   -> Write();
    mh1TrigCount   -> Write();
 
-   cout << "at file close" << endl;
+   
    mOutputFile->Close();
 }
 
@@ -1137,7 +1137,7 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
    if(hadPhi[vzbin].size()<=0)
      return;
    
-   cout << "at hadVec for" << endl;
+   //cout << "at hadVec for" << endl;
    for(Int_t it=0; it < hadPhi[vzbin].size(); it++)
      {
        Float_t hPhi = hadPhi[vzbin][it];
@@ -1147,7 +1147,7 @@ void StNpeRead::addToHadBuffer(StDmesonTrack *trk, Double_t vz)
 
        if((hPhi != Phi) || (hEta != Eta) || (hpT != pT)) // if not the exact same track
 	 {
-	   cout << "actually have mixed had track" << endl;
+	   //cout << "actually have mixed had track" << endl;
 	   
 	   Float_t dPhi = Phi-hPhi;
 	   dPhi = correct_dPhi(dPhi);
