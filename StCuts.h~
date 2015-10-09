@@ -1,5 +1,5 @@
-B
-#1;2cinclude "StTRIGGERS.h"
+
+#include "StTRIGGERS.h"
 
 #ifndef CUTS_H
 #define CUTS_H
@@ -156,7 +156,7 @@ namespace cuts
 
 	const Float_t eta = 1.0;
 	const Float_t eta_low =0.7;
-	const Float_t gDca = 1;
+	const Float_t gDca = 1.5;
         const Float_t pt=0.2;
 	const Float_t Pt_cut=2.0;
 
@@ -179,7 +179,18 @@ namespace cuts
 	const Float_t tof_Ylocal=1.8;
 	//for Pair;
 
-	const Float_t massDCA=0.3;
+	const Float_t massDCA=0.24;
 	const Float_t pairDCA=1.0;
+
+	// For Had ID (Bingchu cuts)
+	const Float_t hadPtMin = 0.2;
+	const Float_t hadEta = 1.0;
+	const Float_t hadDedx = 10;
+	const Float_t hadHitsFit = 15;
+	const Float_t hadDCA = 1.0;
+
+	// pion selection
+	const Float_t nsigmap_low=-0.1;
+        const Float_t nsigmap_high=0.1;
 }
 #endif

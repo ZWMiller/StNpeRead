@@ -458,6 +458,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
       }
 
       Float_t ePhi = Phi;
+      Float_t eEta = trk->gMom().pseudoRapidity();
       Float_t poe  = trk->gMom().mag()/trk->e0();
       Float_t nPhi = trk->nPhi();
       Float_t nEta = trk->nEta();
@@ -504,19 +505,11 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
           Float_t hq    = htrk->charge();
           Float_t dPhi  = ePhi-hPhi;
           Float_t hEta  = htrk->gMom().pseudoRapidity();
+          Float_t dEta  = eEta - hEta;
           Float_t wt    = getHadronWt(hpT,hEta)*weight; // Trigger Electron and Hadron
 
-          /* DEBUG if(printCheck < 20){
-             cout << "WEIGHT: " << wt << endl;
-             printCheck++;}*/
-
           dPhi = correct_dPhi(dPhi);
-          //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
-          //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
-          //mh2PhiQPt[trg]     -> Fill(hPhi,hq*hpT);
-          //		  mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT);
-          //mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt);
-          if(!isInPair) // Not interested in any events part of pairs for semi-inclusive distrib
+          if(!isInPair && pass_dEta(dEta)) // Not interested in any events part of pairs for semi-inclusive distrib
           {
             mh3DelPhiIncl[trg] -> Fill(dPhi,epT,hpT,weight); // This weight only for electron trigger eff
             mh3DelPhiInclWt[trg] -> Fill(dPhi,epT,hpT,wt); 
@@ -558,6 +551,7 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
           Float_t hPhi  = htrk->pMom().phi();
           Float_t dPhi  = phi-hPhi;
           Float_t hEta  = htrk->gMom().pseudoRapidity();
+          Float_t dEta  = eta - hEta;
           Float_t wt    = getHadronWt(hpT,hEta);
           //Float_t zdc = mNpeEvent->ZDCx();
           /* DEBUG if(printCheck < 20){                                                                                                                                      
@@ -566,14 +560,17 @@ void StNpeRead::zFill_Inclusive (Int_t trg,StDmesonEvent * mNpeEvent ,Double_t p
           dPhi = correct_dPhi(dPhi);
           //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
           //if(dPhi < (-1*pi)/2.) dPhi = dPhi+2*pi;
-          mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT);
-          mh3DelPhiHadHadWt[trg] -> Fill(dPhi,pT,hpT,wt);
-          if(pT > 2.5 && pT < 3.5 && trg == 0 && hpT > 0.3)
-            mh1delPhiHad -> Fill(dPhi,wt);
-          for(Int_t q = 0; q < 1; q++)
+          if(pass_dEta(dEta))
           {
-            if(hpT >= hptCut[q])
-              mh3nTracksZdcxHad[trg][q]->Fill(pT,hpT,zdc,wt);
+            mh3DelPhiHadHad[trg] -> Fill(dPhi,pT,hpT);
+            mh3DelPhiHadHadWt[trg] -> Fill(dPhi,pT,hpT,wt);
+            if(pT > 2.5 && pT < 3.5 && trg == 0 && hpT > 0.3)
+              mh1delPhiHad -> Fill(dPhi,wt);
+            for(Int_t q = 0; q < 1; q++)
+            {
+              if(hpT >= hptCut[q] && pass_dEta(dEta))
+                mh3nTracksZdcxHad[trg][q]->Fill(pT,hpT,zdc,wt);
+            }
           }
         }
       }
@@ -612,6 +609,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
         Float_t ebeta = etrk->btofBeta();
         Float_t em_m = ep*ep*(1/(ebeta*ebeta)-1);
         Float_t ePhi = etrk->gMom().phi();
+        Float_t eEta = etrk->gMom().pseudoRapidity();
         Float_t epoe = etrk->gMom().mag()/etrk->e0();
         Float_t eq = etrk->charge();
         Float_t epT = etrk->gMom().perp();
@@ -650,11 +648,12 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
             Float_t hPhi = htrk->pMom().phi();
             Float_t dPhi  = ePhi-hPhi;
             Float_t hEta  = htrk->gMom().pseudoRapidity();
+            Float_t dEta  = eEta - hEta;
             Float_t wt = weight*getHadronWt(hpT,hEta); // Electron and Hadron  
             dPhi = correct_dPhi(dPhi);
             //if(dPhi > (3.*pi)/2.) dPhi = dPhi-2*pi;
             //if(dPhi < -1*pi/2.) dPhi = dPhi+2*pi;
-            if(eq == pq && ptrk != htrk)
+            if(eq == pq && ptrk != htrk && pass_dEta(dEta))
             {
               mh3DelPhiPhotLS[bTrg] -> Fill(dPhi,epT,hpT,weight); // weight for elect trig eff
               mh3DelPhiPhotLSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
@@ -662,7 +661,7 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
               if(epT > 2.5 && epT < 3.5 && bTrg == 0 && hpT > 0.3)
                 mh1delPhiLS -> Fill(dPhi,wt);
             }
-            if(eq != pq && ptrk != htrk)
+            if(eq != pq && ptrk != htrk && pass_dEta(dEta))
             {
               mh3DelPhiPhotUS[bTrg] -> Fill(dPhi,epT,hpT,weight); // weight for elect trig eff
               mh3DelPhiPhotUSWt[bTrg] -> Fill(dPhi,epT,hpT,wt);
@@ -674,9 +673,9 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
             for(Int_t q = 0; q < 1; q++)
             {
               if(hpT >= hptCut[q]){
-                if(eq == pq && ptrk != htrk)
+                if(eq == pq && ptrk != htrk && pass_dEta(dEta))
                   mh3nTracksZdcxLS[bTrg][q]->Fill(epT,hpT,zdc,wt);
-                if(eq != pq && ptrk != htrk)
+                if(eq != pq && ptrk != htrk && pass_dEta(dEta))
                   mh3nTracksZdcxUS[bTrg][q]->Fill(epT,hpT,zdc,wt);
               }
             }
@@ -1164,4 +1163,12 @@ void StNpeRead::zFill_Photonic (Int_t bTrg,StDmesonEvent * mNpeEvent ,Double_t p
     if(dP > pi) dP = dP - 2*pi;
     if(dP < -pi) dP = dP + 2*pi;
     return dP;
+  }
+
+  Bool_t StNpeRead::pass_dEta(Float_t dE)
+  {
+    if(abs(dE) < cuts::dEtaCut)
+      return kTRUE;
+    else
+      return kFALSE;
   }

@@ -89,6 +89,7 @@ class StNpeRead
     Bool_t pass_cut_nsigmaPi(StDmesonTrack *);
     Float_t correct_dPhi(Float_t); // controls wrap around, so I only have to change values in one place
     Double_t getTrgEff(Int_t, Double_t); // Get electron trigger efficiency from XB embedding
+    Bool_t pass_dEta(Float_t); // Make delta Eta cut
     //// end Add
 
   private:
